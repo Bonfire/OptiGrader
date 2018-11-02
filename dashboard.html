@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+
+    <!--Bootstrap links/scripts-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand">
+            <span class="ml-2" style="display: inline-block;">OptiGrader - Teacher Dashboard</span>
+        </a>
+
+        <form class="form-inline">
+            <button type="button" class="btn btn-success mr-2 my-sm-0" id="signOutButton">Sign Out</button>
+        </form>
+    </nav>
+
+    <!-- Teacher Dashboard -->
+    <form>
+        <div class="card w-75 mx-auto container-fluid p-3 bg-light shadow" style="margin-top: 3%">
+            <H3>Welcome, Teacher Example</H3>
+
+            <div class="card-body">
+                <form class="form-inline">
+                    <div class="form-row">
+                        <div class="form-group col-3">
+                            <div class="text-center">
+                                <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#addTestModal">Add Test</button>
+                            </div>
+                        </div>
+                        <!-- Column Spacing -->
+                        <div class="form-group col-2">
+                        </div>
+
+                        <div class="form-group col-7">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search for Exam(s)" aria-label="Search for Exam" aria-describedby="basic-addon2">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- View Test Modal -->
+                <div class="modal" id="viewTestModal" tabindex="-1" role="dialog" aria-labelledby="viewTestModal" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-center" id="viewTestLabel">Exam 1</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Chart image-->
+                                <div class="text-center">
+                                    <img src="images/Exam Grade Distribution.png" width="375" height="185">
+                                </div>
+
+                                <div class="table-responsive">
+                                    <div class="table-responsive">
+                                        <table id="allStudentTestTable" class="table table-border table-hover" style="white-space: nowrap">
+                                            <!-- Column Heading -->
+                                            <thead>
+                                            <tr>
+                                                <th style = "text-align: center;">First Name</th>
+                                                <th style = "text-align: center;">Last Name</th>
+                                                <th style = "text-align: center;">Score</th>
+                                                <th style = "text-align: center;">View Test</th>
+                                            </tr>
+                                            </thead>
+
+                                            <!-- Data pulled from database -->
+                                            <tbody id="studentExams">
+                                            <tr>
+                                                <td style = "text-align: center;">Clifton</td>
+                                                <td style = "text-align: center;">Bowman</td>
+                                                <td style = "text-align: center;">100%</td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-dismiss="modal" data-target="#viewIndividualTestModal">View</button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-center">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close Window</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Individual Test Modal -->
+                <div class="modal" id="viewIndividualTestModal" tabindex="-1" role="dialog" aria-labelledby="viewIndividualTestModal" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-center" id="viewIndividualTestLabel">Exam 1</h5>
+                                <!-- Return back to individual tests -->
+                                <button type="button" class="btn btn-secondary" data-toggle="modal" data-dismiss="modal" data-target="#viewTestModal"><span>Back</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Chart grade distributions/answer distribution -->
+                                <div class="justify-content-between">
+                                    <img src="images/Exam Grade Distribution.png" width="375" height="185">
+                                    <img src="images/Answer Distribution.png" width="375" height="185">
+                                </div>
+
+                                <div class="table-responsive">
+                                    <div class="table-responsive">
+                                        <!-- Table header individual tests -->
+                                        <table id="dataTable" class="table table-border table-hover" style="white-space: nowrap">
+                                            <thead>
+                                            <tr>
+                                                <th style = "text-align: center;">Question Number</th>
+                                                <th style = "text-align: center;">Your Answer</th>
+                                                <th style = "text-align: center;">Correct Answer</th>
+                                                <th style = "text-align: center;">Points Earned</th>
+                                                <th style = "text-align: center;">Points Possible</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody id="tableQuestions">
+                                            <tr>
+                                                <td style = "text-align: center;">1</td>
+                                                <td style = "text-align: center; color: #ff0000;">C</td>
+                                                <td style = "text-align: center;">B</td>
+                                                <td style = "text-align: center;">0.0</td>
+                                                <td style = "text-align: center;">1.0</td>
+                                            </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-center">
+                                <button type="button" class="btn btn-success">Edit</button>
+                                <button type="button" class="btn btn-secondary">Export</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteTestModal" tabindex="-1" role="dialog" aria-labelledby="deleteTestModal" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Delete Confirmation</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete this exam?
+                            </div>
+                            <div class="modal-footer d-flex justify-content-center">
+                                <button type="button" class="btn btn-success">Yes</button>
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Modal -->
+                <div class="modal fade" id="addTestModal" tabindex="-1" role="dialog" aria-labelledby="addTestModal" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addTestModalTitle">Add New Exam</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group">
+                                        <label for="examName">Exam Name</label>
+                                        <input type="text" id="examName" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="examKey">Exam Key</label>
+                                        <input type="text" id="examKey" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-center">
+                                <button type="button" class="btn btn-success">Add</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="teacherDashboardTable" class="table table-border table-hover" style="white-space: nowrap">
+                        <thead>
+                        <tr>
+                            <th style = "text-align: center;">Test Name</th>
+                            <th style = "text-align: center;">Private Test ID</th>
+                            <th style = "text-align: center;">Test Options</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="tableTests">
+                        <tr>
+                            <td style = "text-align: center;">Exam 1</td>
+                            <td style = "text-align: center;">8LY1BDkLrtUTFHaS</td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#viewTestModal">View</button>
+                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteTestModal">Delete</button>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+</html>
