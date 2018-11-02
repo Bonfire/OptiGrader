@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" charset="utf-8">
+
+    <title>OptiGrader - Sign In</title>
+
+        <!-- Bootstrap CSS/JS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand">
+            <span class="ml-2" style="display: inline-block;">OptiGrader</span>
+        </a>
+
+        <form class="form-inline">
+            <a href="login.html">
+                <button class="btn btn-success mr-2 my-sm-0" type="button">Sign In</button>
+            </a>
+            <a href="register.html">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="button">Register</button>
+            </a>
+        </form>
+    </nav>
+
+    <!-- Connection Failed Error/Alert -->
+    <div class="alert alert-danger collapse" role="alert" id="connectionFailedAlert" style="z-index: 1">
+        Unable to connect to server!
+    </div>
+
+    <!-- Logged Out Alert -->
+    <div class="alert alert-success collapse" role="alert" id="signedOutAlert" style="z-index: 1">
+        You've successfully signed out!
+    </div>
+
+    <!-- Invalid Login Alert -->
+    <div class="alert alert-danger collapse" role="alert" id="loginInvalidAlert" style="z-index: 1">
+        Invalid login credentials!
+    </div>
+
+    <!-- Invalid Session Alert -->
+    <div class="alert alert-warning collapse" role="alert" id="invalidSessionAlert" style="z-index: 1">
+        Invalid session: You have signed in somewhere else
+    </div>
+
+    <!-- Login Form -->
+    <div class="container-fluid">
+        <form id="login_form">
+            <div class="row">
+                <div class="container col-6 col-md-4 card p-3 bg-light shadow" style="margin-top: 10%;">
+                    <span class="mx-auto"><h4>Please Sign In</h4></span>
+                    <hr>
+                    <div class="form-group">
+                        <label for="inputEmail">Email</label>
+                        <input type="text" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="name@email.com" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword">Password</label>
+                        <input type="password" class="form-control" id="inputPassword" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+                    </div>
+                    <button type="submit" class="btn btn-success">Sign In</button>
+                    <hr>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
