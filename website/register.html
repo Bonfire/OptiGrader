@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" charset="utf-8">
+
+    <title>OptiGrader - Register</title>
+
+    <!-- Bootstrap CSS/JS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand">
+            <span class="ml-2" style="display: inline-block;">OptiGrader</span>
+        </a>
+
+        <form class="form-inline">
+            <a href="login.html">
+                <button class="btn btn-success mr-2 my-sm-0" type="button">Sign In</button>
+            </a>
+            <a href="register.html">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="button">Register</button>
+            </a>
+        </form>
+    </nav>
+
+    <!-- User Exists Error/Alert -->
+    <div class="alert alert-danger collapse" role="alert" id="userExistsAlert" style="z-index: 1">
+        This email is already taken. <a href="login.html" class="alert-link">Click here to login</a>
+    </div>
+
+    <!-- Connection Failed Error/Alert -->
+    <div class="alert alert-danger collapse" role="alert" id="connectionFailedAlert" style="z-index: 1">
+        Unable to connect to server!
+    </div>
+
+    <!-- Register Form -->
+    <div class="container-fluid">
+        <form id="registration_form">
+            <div class="row">
+                <div class="container col-6 col-md-4 card p-3 bg-light shadow" style="margin-top: 5%;">
+                    <div style="text-align: center;"><h4>Register Here</h4></div>
+                    <hr>
+                    <form class="container was-validated" novalidate>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputFirstName">First Name</label>
+                                <input type="text" class="form-control" id="inputFirstName" placeholder="John" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputLastName">Last Name</label>
+                                <input type="text" class="form-control" id="inputLastName" placeholder="Smith" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputEmail">Email</label>
+                            <input type="text" class="form-control" id="inputEmail" placeholder="name@email.com" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
+                            <div class="invalid-feedback">Please provide a valid email.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputConfirmEmail">Confirm Email</label>
+                            <input type="text" class="form-control" id="inputConfirmEmail" placeholder="name@email.com" required>
+
+                        </div>
+                        <div class="form-group">
+                            <label for="inputPassword">Password</label>
+                            <input type="password" class="form-control" id="inputPassword" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+                            <small id="passwordRequirement" class="form-text text-muted">Your password must be at least 8 characters long, contain uppercase letters, lowercase letters, and numbers.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputConfirmPassword">Confirm Password</label>
+                            <input type="password" class="form-control" id="inputConfirmPassword" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success" id="register" disabled=true>Register</button>
+                    </form>
+                    <hr>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
