@@ -1,11 +1,10 @@
 # OptiGrader
 
-One Paragraph of project description goes here
-
-## Getting Started
-
 OptiGrader is an optical mark recognition (OMR) application.
 It serves as both a scantron grader and an online gradebook. 
+* Scan: Using their smartphone’s camera, users can quickly capture and upload test answers.
+* Score: Once the test period has finished, the user will instantly receive the grade for that test. 
+* See: Logging into the website will allow users to view individual grades, distributions, and various other metrics.
 
 ## Built With
 
