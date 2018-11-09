@@ -1,0 +1,37 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:1-8:12
+	package
+		ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:3:7-27
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+	android:versionName
+		ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:5:7-34
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:2:11-69
+	android:versionCode
+		ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:4:7-33
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+uses-sdk
+ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+	android:targetSdkVersion
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+		ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml
+		ADDED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml:7:5-17
+		INJECTED from C:\Users\nabakin\Dropbox\GitHub\OptiGrader\application\libs\opencv\AndroidManifest.xml

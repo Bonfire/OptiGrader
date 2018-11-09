@@ -35,4 +35,7 @@
   <component name="ProjectType">
     <option name="id" value="Android" />
   </component>
+  <component name="TerminalProjectOptionsProvider">
+    <option name="myStartingDirectory" value="C:\Users\nabakin\Dropbox\Projects\AndroidStudio" />
+  </component>
 </project>

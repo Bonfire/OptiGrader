@@ -5,8 +5,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.util.Log;
+
+import org.opencv.android.OpenCVLoader;
 
 public class MainActivity extends AppCompatActivity {
+
+    static {
+        if (OpenCVLoader.initDebug()) {
+            Log.i("opencv","OpenCV initialization successful");
+        } else {
+            Log.i("opencv","OpenCV initialization failed");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
