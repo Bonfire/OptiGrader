@@ -39,12 +39,24 @@
         android:id="@+id/main_message"
         android:layout_width="235dp"
         android:layout_height="37dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginLeft="64dp"
         android:layout_marginTop="1dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginRight="64dp"
         android:text="@string/main_message"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/enter_id"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/ocvButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="CameraActivity"
+        android:text="OpenCV"
+        tools:layout_editor_absoluteX="136dp"
+        tools:layout_editor_absoluteY="202dp" />
 </android.support.constraint.ConstraintLayout>
