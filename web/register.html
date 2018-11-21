@@ -6,10 +6,21 @@
     <title>OptiGrader - Register</title>
 
 
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js" integrity="sha384-zJXJqc5ftX51ojskUi8aWFg0yrz9P61p6Wyg8n0cyFYsgWiAYtxnVWzh8d8BLcw0" crossorigin="anonymous"></script>
+
+    <script>
+        $(function () {
+            $('[data-toggle="popover"]').popover()
+        })
+
+        $('.popover-dismiss').popover({
+            trigger: 'focus'
+        })
+    </script>
     
     <!-- Bootstrap CSS/JS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -315,8 +326,8 @@
                         </div>
                         <div class="form-group">
                             <label for="inputPassword">Password</label>
+                            <a href="#" tabindex="0" class="badge badge-pill badge-dark" data-toggle="popover" data-trigger="focus" data-content="Your password must be at least 8 characters long, contain uppercase letters, lowercase letters, and numbers.">?</a>
                             <input type="password" class="form-control" id="inputPassword" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
-                            <small id="passwordRequirement" class="form-text text-muted">Your password must be at least 8 characters long, contain uppercase letters, lowercase letters, and numbers.</small>
                         </div>
                         <div class="form-group">
                             <label for="inputConfirmPassword">Confirm Password</label>
@@ -333,13 +344,11 @@
 
                         </div>
 
-
-
                         <button type="submit" class="btn btn-info" id="register" disabled=true>Register</button>
                         <hr>
                         <div class="row mx-auto ">
                             <p class="mb-0">Already have an account?
-                                <a href="login.html">  Sign In</a></p>
+                                <a class="text-black-50" href="login.html">  Sign In.</a></p>
                         </div>
 
 
