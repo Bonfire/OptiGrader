@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" charset="utf-8">
     <title>OptiGrader - Dashboard</title>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
@@ -10,14 +10,15 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js" integrity="sha384-zJXJqc5ftX51ojskUi8aWFg0yrz9P61p6Wyg8n0cyFYsgWiAYtxnVWzh8d8BLcw0" crossorigin="anonymous"></script>
 
-    <link href="./open-iconic-master/font/css/open-iconic-bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" integrity="sha256-BJ/G+e+y7bQdrYkS2RBTyNfBHpA9IuGaPmf9htub5MQ=" crossorigin="anonymous" />
 
     <!--Bootstrap CSS/JS-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
+
 </head>
 
-<body>
+<body class="bg-light">
 <!-- Top Navbar -->
 
 
@@ -106,7 +107,7 @@
                     <h4 style="display:inline-block;">Chapter 1 - Some Test Name</h4>
 
                     <!-- When clicked, change to <span class="oi oi-chevron-top" data-toggle="collapse" href="#examInfo" aria-expanded="false" aria-controls="examInfo"></span>-->
-                    <span class="oi oi-chevron-bottom" data-toggle="collapse" aria-expanded="false" aria-controls="examInfo"></span>
+                    <span class="oi oi-chevron-bottom" data-toggle="collapse" href="#examInfo" aria-expanded="false" aria-controls="examInfo"></span>
 
                     <div class="collapse" id="examInfo">
                         <div class="card card-body">
@@ -167,8 +168,8 @@
 
 
     <!-- Page Content-->
-    <form class="col-md-9 mx-auto">
-        <div class="card container-fluid bg-light ">
+    <div class="col-md-9 mx-auto">
+        <div class="card bg-light ">
             <div class="card-header">
                 <h3 class="card-title mr-2" style="display: inline;">John Smith</h3>
                 <h5 class="card-subtitle text-muted" style="display: inline;">jo123456</h5>
@@ -210,7 +211,7 @@
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 
 
