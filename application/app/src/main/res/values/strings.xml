@@ -20,4 +20,9 @@
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="confirm">Confirm</string>
+
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="capture">Capture</string>
 </resources>
