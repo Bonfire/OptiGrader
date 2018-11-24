@@ -50,4 +50,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/ocvButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="CameraActivity"
+        android:text="OpenCV"
+        tools:layout_editor_absoluteX="136dp"
+        tools:layout_editor_absoluteY="202dp" />
 </android.support.constraint.ConstraintLayout>

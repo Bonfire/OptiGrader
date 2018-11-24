@@ -34,5 +34,16 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void CameraActivity(View view) {
+        Intent intent = new Intent(this, CameraActivity.class);
+        //EditText editText = (EditText) findViewById(R.id.enter_id);
+        //String message = editText.getText().toString();
+        //intent.putExtra(EXTRA_MESSAGE, message);
+
+
+        // I dont have the openCV stuff but this should start it
+        startActivity(intent);
+    }
+
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 }
