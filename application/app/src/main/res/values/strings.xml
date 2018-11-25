@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">OptiGrader</string>
+    <string name="enter_ID">Test ID</string>
+    <string name="button_send">Send</string>
+    <string name="main_message">Enter Your Test ID</string>
+</resources>
