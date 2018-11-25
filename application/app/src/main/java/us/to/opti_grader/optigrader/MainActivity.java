@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.util.Log;
 
 import org.opencv.android.OpenCVLoader;
+import us.to.optigrader.optigrader.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,15 +35,6 @@ public class MainActivity extends AppCompatActivity {
         win.setAttributes(winParams);
     }
 
-    public void sendMessage(View view) {
-        // Do something in response to button
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        EditText editText = (EditText) findViewById(R.id.enter_id);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
-    }
-
     public void CameraActivity(View view) {
         Intent intent = new Intent(this, CameraActivity.class);
         //EditText editText = (EditText) findViewById(R.id.enter_id);
@@ -55,4 +47,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
+
+    public void gotoSignIn(View v){
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        startActivity(loginIntent);
+    }
+
+    public void gotoRegister(View v){
+        Intent registerIntent = new Intent(this, RegisterActivity.class);
+        startActivity(registerIntent);
+    }
 }

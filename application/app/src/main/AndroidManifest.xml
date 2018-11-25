@@ -9,18 +9,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="us.to.opti_grader.optigrader.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DisplayMessageActivity"></activity>
-        <activity android:name=".CameraActivity"
-                  android:screenOrientation="landscape"
-                  android:configChanges="keyboardHidden|orientation"
-                  android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"></activity>
+        <activity android:name="us.to.opti_grader.optigrader.LoginActivity" />
+        <activity android:name="us.to.opti_grader.optigrader.RegisterActivity" />
+        <activity
+            android:name="us.to.opti_grader.optigrader.CameraActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:label="@string/title_activity_camera"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"></activity>
     </application>
 
     <supports-screens android:resizeable="true"
@@ -30,6 +33,11 @@
         android:anyDensity="true" />
 
     <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
