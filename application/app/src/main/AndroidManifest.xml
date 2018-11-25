@@ -17,10 +17,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".DisplayMessageActivity"></activity>
-        <activity android:name=".CameraActivity"></activity>
+        <activity android:name=".CameraActivity"
+                  android:screenOrientation="landscape"
+                  android:configChanges="keyboardHidden|orientation"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"></activity>
     </application>
 
-    <uses-sdk android:minSdkVersion="8" />
+    <supports-screens android:resizeable="true"
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:anyDensity="true" />
 
     <uses-permission android:name="android.permission.CAMERA"/>
 
