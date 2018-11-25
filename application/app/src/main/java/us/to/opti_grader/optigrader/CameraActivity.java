@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import us.to.optigrader.optigrader.R;
+
 public class CameraActivity extends AppCompatActivity implements CvCameraViewListener2 {
 
     private static final String    TAG = "OCVSample::Activity";
