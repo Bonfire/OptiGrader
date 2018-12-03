@@ -5,6 +5,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.android.CameraBridgeViewBase;
@@ -272,7 +273,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                     count++;
                 }
             }
-            // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER
+            // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER.  Can ignore for now.  Something for QA to tackle
 
             MatOfPoint2f src = new MatOfPoint2f(
                     sortedPoints[0],
@@ -298,9 +299,18 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                     new Point(0, 550),
                     new Point(1100, 550),
                     new Point(1100, 0)));
-            Imgproc.drawContours(destImage, temp, -1, new Scalar(57, 255, 20), 2);
+            //Imgproc.drawContours(destImage, temp, -1, new Scalar(57, 255, 20), 2);
 
-            mRgba = destImage;
+            Rect scantron = new Rect(95, 275, 835, 225);
+            Mat cropped = new Mat(destImage, scantron);
+            Mat incoming = new Mat(1080, 1920, CvType.CV_8UC4, new Scalar(0, 0, 0));
+            incoming.adjustROI(0, -(1080-scantron.height), 0, -(1920-scantron.width));
+            cropped.copyTo(incoming);
+            incoming.adjustROI(0, 1080-scantron.height, 0, 1920-scantron.width);
+
+
+
+            mRgba = incoming;
         }
         else if (pressed == false && start)
         {
