@@ -24,11 +24,14 @@ public class JsonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_json);
-        new JsonActivity.BackgroundTask().execute();
-        //getJSON();
+        //new JsonActivity.BackgroundTask().execute();
+        fetchjson();
     }
 
     public void getJSON(View view){
+        new JsonActivity.BackgroundTask().execute();
+    }
+    public void fetchjson(){
         new JsonActivity.BackgroundTask().execute();
     }
 
