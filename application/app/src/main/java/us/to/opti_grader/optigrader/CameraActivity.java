@@ -308,7 +308,20 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             cropped.copyTo(incoming);
             incoming.adjustROI(0, 1080-scantron.height, 0, 1920-scantron.width);
 
+            Mat circles = new Mat();
+            Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
+            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 8, 5, 10);
 
+            // Hough Circles
+            for (int i = 0; i < circles.cols(); i++)
+            {
+                double[] vCircle = circles.get(0, i);
+
+                Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                int radius = (int) Math.round(vCircle[2]);
+
+                Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+            }
 
             mRgba = incoming;
         }
