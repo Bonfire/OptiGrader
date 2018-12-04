@@ -95,7 +95,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/editText3"
+        android:id="@+id/registerFN"
         android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -109,7 +109,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <EditText
-        android:id="@+id/editText4"
+        android:id="@+id/registerLN"
         android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -120,10 +120,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.555"
         app:layout_constraintStart_toEndOf="@+id/textView12"
-        app:layout_constraintTop_toBottomOf="@+id/editText3" />
+        app:layout_constraintTop_toBottomOf="@+id/registerFN" />
 
     <EditText
-        android:id="@+id/editText5"
+        android:id="@+id/registerEM"
         android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -134,7 +134,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.843"
         app:layout_constraintStart_toEndOf="@+id/textView6"
-        app:layout_constraintTop_toBottomOf="@+id/editText4" />
+        app:layout_constraintTop_toBottomOf="@+id/registerLN" />
 
     <EditText
         android:id="@+id/editText6"
@@ -148,10 +148,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.771"
         app:layout_constraintStart_toEndOf="@+id/textView7"
-        app:layout_constraintTop_toBottomOf="@+id/editText5" />
+        app:layout_constraintTop_toBottomOf="@+id/registerEM" />
 
     <EditText
-        android:id="@+id/editText7"
+        android:id="@+id/registerPW"
         android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -176,5 +176,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.771"
         app:layout_constraintStart_toEndOf="@+id/textView9"
-        app:layout_constraintTop_toBottomOf="@+id/editText7" />
+        app:layout_constraintTop_toBottomOf="@+id/registerPW" />
 </android.support.constraint.ConstraintLayout>
