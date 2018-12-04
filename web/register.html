@@ -31,64 +31,13 @@
 
     <script type="application/javascript">
         var email_verified = false;
-        var nid_verified = false;
         var BASE_URL = "https://" + window.location.hostname + ":8080/";
-
-        // Ensure the registration NID is not already in the database.
-        function validateNID()
-        {
-            var inputField = document.getElementById("inputNID");
-
-            if (inputField.checkValidity())
-            {
-                $.ajax(
-                    {
-                        type: "POST",
-                        url: BASE_URL + "register",
-                        data: JSON.stringify(
-                            {
-                                "nid": inputField.value
-                            }),
-                        dataType: "json",
-                        success: function (data, textStatus, jqXHR)
-                        {
-                            $("#connectionFailedAlert").hide();
-
-                            if (typeof data.success !== "undefined")
-                            {
-                                nid_verified = true;
-                                $("#nidExistsAlert").hide();
-                            }
-                            else
-                            {
-                                nid_verified = false;
-                                $("#nidExistsAlert").hide();
-                            }
-                        },
-                        error: function (jqXHR, textStatus, errorThrown)
-                        {
-                            nid_verified = false;
-
-                            if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
-                            {
-                                console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
-                                $("#nidExistsAlert").show();
-                            }
-                            else
-                            {
-                                $("#nidExistsAlert").hide();
-                                $("#connectionFailedAlert").show();
-                            }
-                        }
-                    });
-            }
-        }
 
         // Ensure the registration email is not already in the database.
         function validateEmail()
         {
             var inputField = document.getElementById("inputEmail");
-
+            
             if (inputField.checkValidity())
             {
                 $.ajax(
@@ -134,25 +83,6 @@
             }
         }
 
-        // Ensure both emails are the same and valid.
-        function confirmEmail()
-        {
-            var inputField = document.getElementById("inputEmail");
-            var inputConfirmField = document.getElementById("inputConfirmEmail");
-
-            if (inputField.value === inputConfirmField.value)
-            {
-                if (inputConfirmField.value !== "" && inputField.checkValidity() && !inputConfirmField.checkValidity())
-                {
-                    inputConfirmField.setCustomValidity("");
-                }
-            }
-            else if (inputConfirmField.checkValidity())
-            {
-                inputConfirmField.setCustomValidity("Invalid");
-            }
-        }
-
         // Ensure both passwords are the same and valid.
         function confirmPassword()
         {
@@ -176,10 +106,7 @@
         // they have to be implemented.
         $(document).ready(function ()
         {
-            $(document).on("focusout", "#inputNID", validateNID);
             $(document).on("focusout", "#inputEmail", validateEmail);
-            $(document).on("keyup", "#inputEmail", confirmEmail);
-            $(document).on("keyup", "#inputConfirmEmail", confirmEmail);
 
             $(document).on("keyup", "#inputPassword", confirmPassword);
             $(document).on("keyup", "#inputConfirmPassword", confirmPassword);
@@ -189,14 +116,12 @@
             {
                 var inputFirstNameFieldValid = document.getElementById("inputFirstName").checkValidity();
                 var inputLastNameFieldValid = document.getElementById("inputLastName").checkValidity();
-                var inputNIDValid = document.getElementById("inputNID").checkValidity();
                 var inputEmailFieldValid = document.getElementById("inputEmail").checkValidity();
-                var inputEmailConfirmFieldValid = document.getElementById("inputConfirmEmail").checkValidity();
                 var inputPasswordFieldValid = document.getElementById("inputPassword").checkValidity();
                 var inputPasswordConfirmFieldValid = document.getElementById("inputConfirmPassword").checkValidity();
                 var inputUserModeValid = document.getElementById("user_mode").value !== "";
 
-                if (inputFirstNameFieldValid && inputLastNameFieldValid  && inputNIDValid && nid_verified && inputEmailFieldValid && email_verified && inputEmailConfirmFieldValid && inputPasswordFieldValid && inputPasswordConfirmFieldValid && inputUserModeValid)
+                if (inputFirstNameFieldValid && inputLastNameFieldValid && inputEmailFieldValid && email_verified && inputPasswordFieldValid && inputPasswordConfirmFieldValid && inputUserModeValid)
                 {
                     $('#register').prop('disabled', false);
                 }
@@ -212,7 +137,6 @@
 
                 var inputFirstNameFieldValue = document.getElementById("inputFirstName").value;
                 var inputLastNameFieldValue = document.getElementById("inputLastName").value;
-                var inputNIDFieldValue = document.getElementById("inputNID").value;
                 var inputEmailFieldValue = document.getElementById("inputEmail").value;
                 var inputPasswordFieldValue = document.getElementById("inputPassword").value;
                 var inputUserModeFieldValue = document.getElementById("user_mode").value;
@@ -227,7 +151,6 @@
                         url: BASE_URL + "register",
                         data: JSON.stringify(
                             {
-                                "nid": inputNIDFieldValue,
                                 "user_mode": inputUserModeFieldValue,
                                 "firstname": inputFirstNameFieldValue,
                                 "lastname": inputLastNameFieldValue,
@@ -271,7 +194,6 @@
             <h3 class="masthead-brand">OptiGrader</h3>
             <nav class="nav nav-masthead justify-content-center">
                 <a class="nav-link" href="index.html">Home</a>
-                <a class="nav-link" href="#">Features</a>
                 <a class="nav-link" href="login.html">Sign In</a>
                 <a class="nav-link active" href="register.html">Register</a>
             </nav>
@@ -295,11 +217,6 @@
                                 <label for="inputLastName">Last Name</label>
                                 <input type="text" class="form-control" id="inputLastName" placeholder="Smith" required>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputNID">NID</label>
-                            <input type="text" class="form-control" id="inputNID" placeholder="jo123456" required pattern="[a-z]{2}[0-9]{6}">
-                            <div class="invalid-feedback">Please provide a valid NID.</div>
                         </div>
                         <div class="form-group">
                             <label for="inputEmail">Email</label>
