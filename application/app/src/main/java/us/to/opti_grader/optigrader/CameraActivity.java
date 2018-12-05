@@ -48,6 +48,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     private boolean                pressed;
     private boolean                start = false;
     private boolean                second = false;
+    private String                 tempAnswers;
 
     MatOfPoint                     maxContour;
 
@@ -369,38 +370,12 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             //  //Grading
             //            //Loop of grouped points
             int selection[] = new int[points_grouped.size()];
+            int lCol = 0;
+            int rCol = 25;
            // Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
 
             if(points_grouped.size() > 0)
             {
-                /* int mostFilled = 10000;
-                int selectIdx = -1;
-
-                for (int j = 0; j < 5; j++)
-                {
-                    Point cur = points_grouped.get(0).get(j);
-                    Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
-                    Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
-
-                    Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
-                    Core.bitwise_and(thresh, mask, conjunction);
-
-                    int countWhitePixels = Core.countNonZero(conjunction);
-
-                    if (countWhitePixels < mostFilled)
-                    {
-                        mostFilled = countWhitePixels;
-                        selectIdx = j;
-                    }
-                }
-                if (selectIdx != -1)
-                {
-                    selection[0] = selectIdx;
-                    Imgproc.circle(incoming, points_grouped.get(0).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
-                }
-
-            } */
-
                 for (int i = 0; i < points_grouped.size(); i++)
                 {
                     int mostFilled = 100000;
@@ -424,13 +399,22 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                         }
                     }
                     //add selected answer to array and output image
-                    if (selectIdx != -1)
+                    if (selectIdx != -1 && i % 2 == 0)
                     {
-                        selection[i] = selectIdx;
+                        selection[lCol] = selectIdx;
+                        lCol++;
                         Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
                     }
+                    else if(selectIdx != -1 && i % 2 == 1)
+                    {
+                        selection[rCol] = selectIdx;
+                        rCol++;
+                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(255, 255, 20), 2);
+                    }
                 }
+                tempAnswers =  selection.toString();
             }
+
             //sort array to string of numbers
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
