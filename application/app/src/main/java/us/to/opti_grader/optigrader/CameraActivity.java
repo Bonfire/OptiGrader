@@ -1,165 +1,446 @@
 package us.to.opti_grader.optigrader;
 
-import android.annotation.SuppressLint;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
-import android.view.View;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import us.to.optigrader.optigrader.R;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
-public class CameraActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
+import static android.Manifest.permission.CAMERA;
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+public class CameraActivity extends AppCompatActivity implements CvCameraViewListener2 {
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
+    private static final String    TAG = "OCVSample::Activity";
+
+    private Mat                    mRgba;
+    private Mat                    altframe;
+    private Mat                    mIntermediateMat;
+    private Mat                    mIntermediateMat2;
+
+    private CameraBridgeViewBase   mOpenCvCameraView;
+
+    private boolean                pressed;
+    private boolean                start = false;
+    private boolean                second = false;
+
+    MatOfPoint                     maxContour;
+
+    private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                    mOpenCvCameraView.enableView();
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
             }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
         }
     };
 
+    public CameraActivity() {
+        Log.i(TAG, "Instantiated new " + this.getClass());
+    }
+
+    /** Called when the activity is first created. */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        int rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+        Window win = getWindow();
+        WindowManager.LayoutParams winParams = win.getAttributes();
+        winParams.rotationAnimation = rotationAnimation;
+        win.setAttributes(winParams);
 
         setContentView(R.layout.activity_camera);
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        ActivityCompat.requestPermissions(CameraActivity.this,
+                new String[] {CAMERA}, 1);
 
-
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_view);
+        mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
+    public void onPause()
+    {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
     }
 
-    private void toggle() {
-        if (mVisible) {
-            hide();
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
         } else {
-            show();
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
 
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    public void onCameraViewStarted(int width, int height) {
+        mRgba = new Mat(height, width, CvType.CV_8UC4);
+        mIntermediateMat = new Mat(height, width, CvType.CV_8UC4);
+        mIntermediateMat2 = new Mat(height, width, CvType.CV_8UC4);
+        maxContour = new MatOfPoint();
+    }
+
+    public void onCameraViewStopped() {
+        mRgba.release();
+        mIntermediateMat.release();
+        mIntermediateMat2.release();
+        maxContour.release();
+    }
+
+    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+
+        if (!start)
+            start = true;
+
+        if (!pressed && start)
+        {
+            // This code is run after camera init and when the user has not pressed the screen
+            // If the user has pressed the screen, control is turned over to onUserInteraction()
+
+            List<MatOfPoint> contours = new ArrayList<>();
+
+            // Save frame to global variable for onUserInteraction() processing
+            altframe = inputFrame.rgba();
+
+            // Filtering
+            Imgproc.GaussianBlur(inputFrame.gray(), mIntermediateMat2, new Size(5, 5), 0);
+            Imgproc.Canny(mIntermediateMat2, mIntermediateMat, 75, 200);
+
+            // Obtain contours, looking for scantron outline
+            Imgproc.findContours(mIntermediateMat, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            // Draw biggest contour onto the screen.  If user presses screen, they will select that
+            // contour and control will be moved to onUserInteraction()
+            double maxContourArea = 0;
+            for (MatOfPoint contour : contours) {
+                double tempContourArea = Imgproc.contourArea(contour);
+                if (tempContourArea > maxContourArea) {
+                    maxContour = contour;
+                    maxContourArea = tempContourArea;
+                }
+            }
+
+            List<MatOfPoint> temp = new ArrayList<>();
+            temp.add(maxContour);
+            Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
+
+            // Draw contour only if one actually exists
+            if (contours.size() > 0)
+                Imgproc.drawContours(mRgba, temp, -1, new Scalar(57, 255, 20), 2);
         }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
 
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        return mRgba;
     }
 
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
+    // This method is called by Android every time there is an input event by the user.
+    // Touching the screen calls this.
+    @Override
+    public void onUserInteraction() {
+        if (start && second) {
+            // If camera has been initialized and the screen has been pressed a second time (to confirm scantron contour).
+            // Start processing image.  This code transforms, crops, and detects the answer circles.
+            pressed = true;
+            Log.i(TAG, "Screen pressed");
 
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
+            // Approximates contour with less vertexes
+            MatOfPoint2f m2f = new MatOfPoint2f();
+            maxContour.convertTo(m2f, CvType.CV_32FC2);
+            double arc = Imgproc.arcLength(m2f, true);
+            MatOfPoint2f approx = new MatOfPoint2f();
+            Imgproc.approxPolyDP(m2f, approx, arc * 0.01, true);
+            MatOfPoint contour = new MatOfPoint();
+            approx.convertTo(contour, CvType.CV_32S);
 
-    /**
-     * Schedules a call to hide() in delay milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+            // Get the centroid of the image
+            Moments moment = Imgproc.moments(contour);
+            int x = (int) (moment.get_m10() / moment.get_m00());
+            int y = (int) (moment.get_m01() / moment.get_m00());
+
+            Point[] sortedPoints = new Point[4];
+
+            // Using that centroid, find the outermost points on the image's matrix.
+            double[] data;
+            int count = 0;
+            Log.i(TAG, "Screen pressed2: " + contour.rows());
+            for (int i = 0; i < contour.rows(); i++) {
+                data = contour.get(i, 0);
+                double datax = data[0];
+                double datay = data[1];
+                if (datax < x && datay < y) {
+                    sortedPoints[0] = new Point(datax, datay);
+                    count++;
+                } else if (datax > x && datay < y) {
+                    sortedPoints[1] = new Point(datax, datay);
+                    count++;
+                } else if (datax < x && datay > y) {
+                    sortedPoints[2] = new Point(datax, datay);
+                    count++;
+                } else if (datax > x && datay > y) {
+                    sortedPoints[3] = new Point(datax, datay);
+                    count++;
+                }
+            }
+            // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER.  Can ignore for now.  Not that important
+
+            // Corners of material to perspective transform from
+            MatOfPoint2f src = new MatOfPoint2f(
+                    sortedPoints[0],
+                    sortedPoints[1],
+                    sortedPoints[2],
+                    sortedPoints[3]);
+
+            // Corners of material to perspective transform to
+            MatOfPoint2f dst = new MatOfPoint2f(
+                    new Point(0, 0),
+                    new Point(1100 - 1, 0),
+                    new Point(0, 550 - 1),
+                    new Point(1100 - 1, 550 - 1)
+
+
+            );
+
+            // Get transform to warp how we want
+            Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
+
+            // Warp image/material with transform
+            Mat destImage = new Mat();
+            Imgproc.warpPerspective(altframe, destImage, warpMat, mRgba.size());
+
+            // ignore
+            /*List<MatOfPoint> temp = new ArrayList<>();
+            temp.add(new MatOfPoint(
+                    new Point(0, 0),
+                    new Point(0, 550),
+                    new Point(1100, 550),
+                    new Point(1100, 0)));*/
+            //Imgproc.drawContours(destImage, temp, -1, new Scalar(57, 255, 20), 2);
+
+            // Isolate scantron answers
+            Rect scantron = new Rect(75, 275, 855, 225);
+
+            // Crop image (filter out any unnecessary data)
+            Mat cropped = new Mat(destImage, scantron);
+
+            // Reminder: OpenCV is in landscape!  This means if you're holding your phone upright, x axis is y and y axis is x.
+            // Coordinates (0,0) are the top right of the phone screen. (Still holding phone upright)
+
+            // Base material to display to users.  SCREEN-SPECIFC!  It only works with camera's initialized to the 1920*1080 resolution.
+            // Deviating from this resolution will result in an app crash bc cant place small material on bigger screen. rgb is 0,0,0 so all pixels initialized to black.
+            Mat incoming = new Mat(1080, 1920, CvType.CV_8UC4, new Scalar(0, 0, 0));
+
+            // In order to insert cropped image into base material, have to adjust the Region of Interest.  Sad to say it took me 4 hours to figure this out with no help from the internet forums.
+            incoming.adjustROI(0, -(1080 - scantron.height), 0, -(1920 - scantron.width));
+            cropped.copyTo(incoming);
+            incoming.adjustROI(0, 1080 - scantron.height, 0, 1920 - scantron.width);
+
+            // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
+            Mat circles = new Mat();
+            //Convert color to gray
+            Imgproc.cvtColor(incoming, mIntermediateMat, 7);
+            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
+
+            List<Point> points = new ArrayList<Point>();
+
+            // Draw Hough Circles onto base material
+            for (int i = 0; i < circles.cols(); i++) {
+                double[] vCircle = circles.get(0, i);
+
+                Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                int radius = (int) Math.round(vCircle[2]);
+                points.add(pt);
+
+                //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+            }
+
+            // Sort by y axis (when holding phone upright)
+            Collections.sort(points, new Comparator<Point>() {
+                public int compare(Point o1, Point o2) {
+                    int result = 0;
+                    if (o1.x > o2.x)
+                        result = 1;
+                    else if (o1.x < o2.x)
+                        result = -1;
+                    else
+                        result = 0;
+
+                    return result;
+                }
+            });
+
+            // Group by 5s.  Only if number of answers is divisible by 5 (will crash otherwise)
+            List<List<Point>> points_grouped = new ArrayList<List<Point>>();
+            if (points.size() % 5 == 0) {
+                List<Point> temp;
+                for (int i = 0; i < points.size() / 5; i++) {
+                    temp = new ArrayList<>();
+
+                    temp.add(points.get(i * 5));
+                    temp.add(points.get(i * 5 + 1));
+                    temp.add(points.get(i * 5 + 2));
+                    temp.add(points.get(i * 5 + 3));
+                    temp.add(points.get(i * 5 + 4));
+
+                    points_grouped.add(temp);
+                }
+            }
+
+            // Sort each group by x axis to align with letters A, B, C, etc
+            for (List<Point> group : points_grouped)
+            {
+                Collections.sort(group, new Comparator<Point>()
+                {
+                    public int compare(Point o1, Point o2) {
+                        int result = 0;
+                        if (o1.y < o2.y)
+                            result = 1;
+                        else if (o1.y > o2.y)
+                            result = -1;
+                        else
+                            result = 0;
+
+                        return result;
+                    }
+                });
+            }
+
+            // If have all the circles, make circle in the letters A and C of question 1
+            //if (points.size() % 5 == 0)
+            //{
+            //    List<Point> group = points_grouped.get(0);
+                //Imgproc.circle(incoming, group.get(0), 5, new Scalar(57, 255, 20), 2);
+                //Imgproc.circle(incoming, group.get(2), 5, new Scalar(57, 255, 20), 2);
+            //}
+
+            Mat thresh = new Mat(incoming.size(), CvType.CV_8UC1);
+            Imgproc.threshold(mIntermediateMat, thresh, 150, 250, Imgproc.THRESH_BINARY);
+
+            //Core.bitwise_and(thresh, mask, conjunction);
+
+            //  //Grading
+            //            //Loop of grouped points
+            int selection[] = new int[points_grouped.size()];
+           // Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+
+            if(points_grouped.size() > 0)
+            {
+                /* int mostFilled = 10000;
+                int selectIdx = -1;
+
+                for (int j = 0; j < 5; j++)
+                {
+                    Point cur = points_grouped.get(0).get(j);
+                    Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
+                    Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
+
+                    Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+                    Core.bitwise_and(thresh, mask, conjunction);
+
+                    int countWhitePixels = Core.countNonZero(conjunction);
+
+                    if (countWhitePixels < mostFilled)
+                    {
+                        mostFilled = countWhitePixels;
+                        selectIdx = j;
+                    }
+                }
+                if (selectIdx != -1)
+                {
+                    selection[0] = selectIdx;
+                    Imgproc.circle(incoming, points_grouped.get(0).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
+                }
+
+            } */
+
+                for (int i = 0; i < points_grouped.size(); i++)
+                {
+                    int mostFilled = 100000;
+                    int selectIdx = -1;
+
+                    for (int j = 0; j < 5; j++)
+                    {
+                        Point cur = points_grouped.get(i).get(j);
+                        Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
+                        Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
+
+                        Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+                        Core.bitwise_and(thresh, mask, conjunction);
+
+                        int countWhitePixels = Core.countNonZero(conjunction);
+
+                        if (countWhitePixels < mostFilled)
+                        {
+                            mostFilled = countWhitePixels;
+                            selectIdx = j;
+                        }
+                    }
+                    //add selected answer to array and output image
+                    if (selectIdx != -1)
+                    {
+                        selection[i] = selectIdx;
+                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
+                    }
+                }
+            }
+            //sort array to string of numbers
+            // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
+            mRgba = incoming;
+
+        }
+        else if (pressed == false && start)
+        {
+            // First press, stops onCameraFrame updating to show user the contour.  Another press and will start processing.
+            second = true;
+            pressed = true;
+        }
     }
 }
