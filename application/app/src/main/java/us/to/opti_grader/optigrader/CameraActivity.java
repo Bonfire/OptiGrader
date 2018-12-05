@@ -243,7 +243,13 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                     new Point(1100 - 1, 0),
                     new Point(0, 550 - 1),
                     new Point(1100 - 1, 550 - 1)
+
+
             );
+            //                    new Point(0, 0),
+            //                    new Point(1920 - 1, 0),
+            //                    new Point(0, 1080 - 1),
+            //                    new Point(1920 - 1, 1080 - 1)
 
             // Get transform to warp how we want
             Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
@@ -279,10 +285,11 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             cropped.copyTo(incoming);
             incoming.adjustROI(0, 1080-scantron.height, 0, 1920-scantron.width);
 
-            // Filtering and circle detection.  The HoughCircles params are *super* delicate, so treat with care.
+            // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
             Mat circles = new Mat();
-            Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
-            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 8, 5, 10);
+            //Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
+            Imgproc.cvtColor(incoming,mIntermediateMat, 7);                                                        
+            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
 
             // Draw Hough Circles onto base material
             for (int i = 0; i < circles.cols(); i++)
