@@ -14,6 +14,7 @@ public class SessionHandler {
     private static final String KEY_F_NAME = "firstName";
     private static final String KEY_L_NAME = "lastName";
     private static final String KEY_EMPTY = "";
+    private static final String KEY_TOKEN = "token";
     private Context mContext;
     private SharedPreferences.Editor mEditor;
     private SharedPreferences mPreferences;
@@ -30,12 +31,14 @@ public class SessionHandler {
      * @param login
      * @param fName
      * @param fName
+     * @param token
      *
      */
-    public void loginUser(String login, String fName, String lName) {
+    public void loginUser(String login, String fName, String lName, String token) {
         mEditor.putString(KEY_USERNAME, login);
         mEditor.putString(KEY_F_NAME, fName);
         mEditor.putString(KEY_L_NAME, lName);
+        mEditor.putString(KEY_TOKEN, token);
         Date date = new Date();
 
         //Set user session for next 7 days
@@ -79,6 +82,7 @@ public class SessionHandler {
             return null;
         }
         user user = new user();
+        user.setToken(mPreferences.getString(KEY_TOKEN, KEY_EMPTY));
         user.setUsername(mPreferences.getString(KEY_USERNAME, KEY_EMPTY));
         user.setFullName(mPreferences.getString(KEY_F_NAME, KEY_EMPTY),mPreferences.getString(KEY_L_NAME, KEY_EMPTY));
         user.setSessionExpiryDate(new Date(mPreferences.getLong(KEY_EXPIRES, 0)));

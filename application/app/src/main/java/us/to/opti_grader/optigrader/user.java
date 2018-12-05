@@ -7,10 +7,15 @@ public class user{
     String fullName;
     String fName;
     String lName;
+    String token;
     Date sessionExpiryDate;
 
     public void setUsername(String login) {
         this.login = login;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setFullName(String fName, String lName) {
@@ -19,6 +24,10 @@ public class user{
 
     public void setSessionExpiryDate(Date sessionExpiryDate) {
         this.sessionExpiryDate = sessionExpiryDate;
+    }
+
+    public String getToken() {
+        return token;
     }
 
     public String getUsername() {
