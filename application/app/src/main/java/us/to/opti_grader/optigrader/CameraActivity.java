@@ -248,10 +248,6 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
 
             );
-            //                    new Point(0, 0),
-            //                    new Point(1920 - 1, 0),
-            //                    new Point(0, 1080 - 1),
-            //                    new Point(1920 - 1, 1080 - 1)
 
             // Get transform to warp how we want
             Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
@@ -358,52 +354,84 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             }
 
             // If have all the circles, make circle in the letters A and C of question 1
-            if (points.size() % 5 == 0)
-            {
-                List<Point> group = points_grouped.get(0);
+            //if (points.size() % 5 == 0)
+            //{
+            //    List<Point> group = points_grouped.get(0);
                 //Imgproc.circle(incoming, group.get(0), 5, new Scalar(57, 255, 20), 2);
                 //Imgproc.circle(incoming, group.get(2), 5, new Scalar(57, 255, 20), 2);
-            }
+            //}
 
             Mat thresh = new Mat(incoming.size(), CvType.CV_8UC1);
-            Imgproc.threshold(incoming, thresh, 150, 250, 0);
+            Imgproc.threshold(mIntermediateMat, thresh, 150, 250, Imgproc.THRESH_BINARY);
 
-            //Grading
-            //Loop of grouped points
+            //Core.bitwise_and(thresh, mask, conjunction);
+
+            //  //Grading
+            //            //Loop of grouped points
             int selection[] = new int[points_grouped.size()];
-            for(int i =0; i < points_grouped.size(); i++)
+           // Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+
+            if(points_grouped.size() > 0)
             {
-                int[][] filled = new int[points_grouped.size()][5];
-                int mostFilled = 0;
+                /* int mostFilled = 10000;
                 int selectIdx = -1;
 
-                for(int j = 0; j < 5; j++)
+                for (int j = 0; j < 5; j++)
                 {
-                    Point cur = points_grouped.get(i).get(j);
-
-                    Mat mask = new Mat(circles.size(), CvType.CV_8UC1);
+                    Point cur = points_grouped.get(0).get(j);
+                    Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
                     Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
 
                     Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
-                    Core.bitwise_and(thresh ,mask, conjunction);
+                    Core.bitwise_and(thresh, mask, conjunction);
 
                     int countWhitePixels = Core.countNonZero(conjunction);
-                    filled[j]=new int[]{countWhitePixels, i, j};
 
-                    if(countWhitePixels > mostFilled)
+                    if (countWhitePixels < mostFilled)
                     {
                         mostFilled = countWhitePixels;
                         selectIdx = j;
                     }
                 }
-                //add selected answer to array and output image
-                if(selectIdx != -1)
+                if (selectIdx != -1)
                 {
-                    selection[i] = selectIdx;
-                    Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx) , 6, new Scalar(57, 255, 20), 2);
+                    selection[0] = selectIdx;
+                    Imgproc.circle(incoming, points_grouped.get(0).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
+                }
+
+            } */
+
+                for (int i = 0; i < points_grouped.size(); i++)
+                {
+                    int mostFilled = 100000;
+                    int selectIdx = -1;
+
+                    for (int j = 0; j < 5; j++)
+                    {
+                        Point cur = points_grouped.get(i).get(j);
+                        Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
+                        Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
+
+                        Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+                        Core.bitwise_and(thresh, mask, conjunction);
+
+                        int countWhitePixels = Core.countNonZero(conjunction);
+
+                        if (countWhitePixels < mostFilled)
+                        {
+                            mostFilled = countWhitePixels;
+                            selectIdx = j;
+                        }
+                    }
+                    //add selected answer to array and output image
+                    if (selectIdx != -1)
+                    {
+                        selection[i] = selectIdx;
+                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
+                    }
                 }
             }
-
+            //sort array to string of numbers
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
 
