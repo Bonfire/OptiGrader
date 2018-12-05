@@ -10,6 +10,7 @@ public class user{
     String token;
     Date sessionExpiryDate;
 
+
     public void setUsername(String login) {
         this.login = login;
     }
