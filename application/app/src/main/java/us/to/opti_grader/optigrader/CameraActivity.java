@@ -4,7 +4,6 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.android.CameraBridgeViewBase;
@@ -289,7 +288,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
             // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
             Mat circles = new Mat();
-            //Convert color to gray
+            //Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
             Imgproc.cvtColor(incoming, mIntermediateMat, 7);
             Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
 
@@ -303,7 +302,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                 int radius = (int) Math.round(vCircle[2]);
                 points.add(pt);
 
-                //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+                Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
             }
 
             // Sort by y axis (when holding phone upright)
@@ -361,52 +360,12 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             if (points.size() % 5 == 0)
             {
                 List<Point> group = points_grouped.get(0);
-                //Imgproc.circle(incoming, group.get(0), 5, new Scalar(57, 255, 20), 2);
-                //Imgproc.circle(incoming, group.get(2), 5, new Scalar(57, 255, 20), 2);
-            }
-
-            Mat thresh = new Mat(incoming.size(), CvType.CV_8UC1);
-            Imgproc.threshold(incoming, thresh, 150, 250, 0);
-
-            //Grading
-            //Loop of grouped points
-            int selection[] = new int[points_grouped.size()];
-            for(int i =0; i < points_grouped.size(); i++)
-            {
-                int[][] filled = new int[points_grouped.size()][5];
-                int mostFilled = 0;
-                int selectIdx = -1;
-
-                for(int j = 0; j < 5; j++)
-                {
-                    Point cur = points_grouped.get(i).get(j);
-
-                    Mat mask = new Mat(circles.size(), CvType.CV_8UC1);
-                    Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
-
-                    Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
-                    Core.bitwise_and(thresh ,mask, conjunction);
-
-                    int countWhitePixels = Core.countNonZero(conjunction);
-                    filled[j]=new int[]{countWhitePixels, i, j};
-
-                    if(countWhitePixels > mostFilled)
-                    {
-                        mostFilled = countWhitePixels;
-                        selectIdx = j;
-                    }
-                }
-                //add selected answer to array and output image
-                if(selectIdx != -1)
-                {
-                    selection[i] = selectIdx;
-                    Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx) , 6, new Scalar(57, 255, 20), 2);
-                }
+                Imgproc.circle(incoming, group.get(0), 3, new Scalar(57, 255, 20), 2);
+                Imgproc.circle(incoming, group.get(2), 3, new Scalar(57, 255, 20), 2);
             }
 
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
-
         }
         else if (pressed == false && start)
         {
