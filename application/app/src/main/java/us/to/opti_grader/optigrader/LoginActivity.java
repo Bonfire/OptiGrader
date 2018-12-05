@@ -1,12 +1,20 @@
 package us.to.opti_grader.optigrader;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,49 +28,65 @@ import java.net.URL;
 import us.to.optigrader.optigrader.R;
 
 public class LoginActivity extends AppCompatActivity {
+    private static final String KEY_STATUS = "status";
+    private static final String KEY_MESSAGE = "message";
+    private static final String KEY_FULL_NAME = "full_name";
+    private static final String KEY_F_NAME = "first_name";
+    private static final String KEY_L_NAME = "last_name";
+    private static final String KEY_USERNAME = "login";
+    private static final String KEY_PASSWORD = "password";
+    private static final String KEY_EMPTY = "";
+    private EditText emailEdit;
+    private EditText passwordEdit;
+    private String login;
+    private String password;
+    private ProgressDialog pDialog;
+    private String login_url = "https://optigrader.mahabal.org:8080/login";
+    //private String login_url = "http://10.0.2.2:80/member/login.php";
+    private SessionHandler session;
 
-    String username, password;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        writeJSON();
-
-
-
-    }
-
-    public void dologin(View v){
-        EditText emailEdit;
-        EditText passwordEdit;
-
-
-        emailEdit= (EditText)findViewById(R.id.loginEmail);
-        passwordEdit=(EditText)findViewById(R.id.loginPassword);
-
-        Log.v("EditText", emailEdit.getText().toString());
-        username=emailEdit.getText().toString();
-        //password=passwordEdit.getText().toString();
-        password=findViewById(R.id.loginPassword).toString();
-
-
-    }
-
-    public void writeJSON() {
-        JSONObject object = new JSONObject();
-        try {
-            object.put("login", username);
-            object.put("password", password);
-
-            SendDeviceDetails sendDetails = new SendDeviceDetails();
-            sendDetails.execute("https://optigrader.mahabal.org:8080/login", object.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+        session = new SessionHandler(getApplicationContext());
+        if(session.isLoggedIn()){
+            loadHomepage();
         }
 
+        setContentView(R.layout.activity_login);
+        emailEdit = (EditText)findViewById(R.id.loginEmail);
+        passwordEdit=(EditText)findViewById(R.id.loginPassword);
+
+
+        Button loginbtn = findViewById(R.id.loginBtn);
+
+        loginbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Retrieve the data entered in the edit texts
+
+                login=emailEdit.getText().toString();
+                password=passwordEdit.getText().toString();
+
+                if (validateInputs()) {
+                    login();
+                }
+            }
+        });
+
     }
+
+
+
+    private void loadHomepage() {
+        Intent i = new Intent(getApplicationContext(), HomepageActivity.class);
+        startActivity(i);
+        finish();
+
+    }
+
 
     public void openCapture(View v){
 
@@ -71,6 +95,116 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
+
+    // copy test
+
+    private void login() {
+        //displayLoader();
+        JSONObject request = new JSONObject();
+        try {
+            //Populate the request parameters
+            request.put(KEY_USERNAME, login);
+            request.put(KEY_PASSWORD, password);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsArrayRequest = new JsonObjectRequest
+                (Request.Method.POST, login_url, request, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //pDialog.dismiss();
+                        try {
+                            //Check if user got logged in successfully
+
+                            if (response.getInt(KEY_STATUS) == 0) {
+                                session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
+                                loadHomepage();
+
+                            }else{
+                                Toast.makeText(getApplicationContext(),
+                                        response.getString(KEY_MESSAGE), Toast.LENGTH_SHORT).show();
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        pDialog.dismiss();
+
+                        //Display error message whenever an error occurs
+                        Toast.makeText(getApplicationContext(),
+                                error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsArrayRequest);
+    }
+
+    private boolean validateInputs() {
+        if(KEY_EMPTY.equals(login)){
+            emailEdit.setError("Username cannot be empty");
+            emailEdit.requestFocus();
+            return false;
+        }
+        if(KEY_EMPTY.equals(password)){
+            passwordEdit.setError("Password cannot be empty");
+            passwordEdit.requestFocus();
+            return false;
+        }
+        return true;
+    }
+
+    //copy test
+
+
+
+
+
+
+
+    public void dologin(View v) {
+        String login, password;
+        EditText emailEdit = (EditText)findViewById(R.id.loginEmail);
+        EditText passwordEdit=(EditText)findViewById(R.id.loginPassword);
+
+        login=emailEdit.getText().toString();
+        password=passwordEdit.getText().toString();
+
+        JSONObject payload = new JSONObject();
+        try {
+
+            //payload.put("firstName", firstName);
+            //payload.put("lastName", lastName);
+            payload.put("login", login);
+            payload.put("password", password);
+            //payload.put("email", email);
+
+            /*
+            payload.put("firstName", "mike");
+            payload.put("lastName", "doe");
+            payload.put("login", "mike@gmail.com");
+            payload.put("password", "somepass");
+            payload.put("email", "email");
+            */
+
+            SendDeviceDetails sendDetails = new SendDeviceDetails();
+            sendDetails.execute("http://10.0.2.2:80/project/register.php", payload.toString());
+            finish();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //return payload;
+
+    }
+
     private class SendDeviceDetails extends AsyncTask<String, Void, String> {
 
         @Override
@@ -84,10 +218,13 @@ public class LoginActivity extends AppCompatActivity {
                 httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
                 httpURLConnection.setRequestMethod("POST");
 
+                //testing
+                //httpURLConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
                 httpURLConnection.setDoOutput(true);
 
                 DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-                wr.writeBytes("PostData=" + params[1]);
+                wr.writeBytes(/*"PostData=" + */params[1]);
                 wr.flush();
                 wr.close();
 
@@ -106,6 +243,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
                 }
+                //finish();
             }
 
             return data;
