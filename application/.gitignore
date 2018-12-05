@@ -237,7 +237,7 @@ gradle-app.setting
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
 .idea/**/dbnavigator.xml
-.idea/**/Project.xml
+.idea/codeStyles/*
 
 # Gradle
 .idea/**/gradle.xml
