@@ -20,110 +20,373 @@
 
     <!-- Password Popover -->
     <script>
-        $(function () {
-            $('[data-toggle="popover"]').popover()
+        // TEST DATA
+        var teacherJSON = 
+        [
+            {
+                name: "Exam 1",
+                id: "q7D3jG05Df",
+                avgScore: 76,
+                highScore: 100,
+                lowScore: 60,
+                numQuestions: 10,
+                solutions: "ACDABACDBB",
+                inner: [
+                    {name: "Mary Sue", id: "ms123456", score: 100, submitted: "ACDABACDBB"},
+                    {name: "John Smith", id: "js648274", score: 70, submitted: "ABBBBACDBB"},
+                    {name: "Jane Doe", id: "jd759478", score: 60, submitted: "ABBADACDCB"}
+                ]
+           },
+           {
+                name: "Exam 2",
+                id: "A4dg2VG31",
+                avgScore: 46,
+                highScore: 80,
+                lowScore: 20,
+                numQuestions: 25,
+                solutions: "AAAAAAAAAAAAAAAAAAAAAAAAA",
+                inner: [
+                    {name: "Mary Sue", id: "ms123456", score: 20, submitted: "CCCCACCCACCAACCCCCCCACCCC"},
+                    {name: "Shorty Smalls", id: "ss845068", score: 40, submitted: "DAADDDADDDDADDAAADDADDADA"},
+                    {name: "Tester Testington", id: "tt274958", score: 80, submitted: "AABAAAAABAAAABAAAABAAABAA"}
+                ]
+           }
+        ]
+
+        var studentJSON =
+        {
+            name: "Mary Sue",
+            id: "ms123456",
+            inner: 
+            [
+                {
+                    name: "Exam 1",
+                    id: "q7D3jG05Df",
+                    avgScore: 76,
+                    highScore: 100,
+                    lowScore: 60,
+                    numQuestions: 10,
+                    solutions: "ACDABACDBB",
+                    score: 100,
+                    submitted: "ACDABACDBB"
+                },
+                {
+                    name: "Exam 2",
+                    id: "A4dg2VG31",
+                    avgScore: 46,
+                    highScore: 80,
+                    lowScore: 20,
+                    numQuestions: 25,
+                    solutions: "AAAAAAAAAAAAAAAAAAAAAAAAA",
+                    score: 20,
+                    submitted: "CCCCACCCACCAACCCCCCCACCCC"
+                }
+            ]
+        }
+
+
+
+        var userJSON;
+        var userMode;
+        
+        // DOCUMENT READY
+        $(document).ready(function ()
+        {
+            $.ajax(
+            {
+              type: "POST",
+              url: BASE_URL + "dashboard",
+              data: JSON.stringify(
+              {
+                "token": token,
+                "action": "get_contacts"
+              }),
+              dataType: "json",
+              success: function (data, textStatus, jqXHR)
+              {
+                $("#serverErrorAlert").hide();
+                $("#connectionFailedAlert").hide();
+              
+                if (typeof data.status !== "undefined")
+                {
+                  console.log(data)
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                console.log("RIP AF");
+                /*
+                if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
+                {
+                  console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
+                  
+                  if (jqXHR.responseJSON.error === "Invalid token received!")
+                  {
+                    document.cookie = "token=; Max-Age=0;";
+                    window.location.href = "login.html?logout=0";
+                  }
+                  
+                  document.getElementById("serverErrorAlert").innerHTML = jqXHR.responseJSON.error;
+                  $("#connectionFailedAlert").hide();
+                  $("#serverErrorAlert").show();
+                }
+                else
+                {
+                  $("#serverErrorAlert").hide();
+                  $("#connectionFailedAlert").show();
+                }
+              }
+              */
+            });
+
+            userMode = 1;
+            userJSON = userMode? teacherJSON: studentJSON;
+            var outer;
+
+            if(userMode)
+            {
+                fillGrid(userJSON);
+            }
+            else
+            {
+                outer = userJSON;
+                fillNavBar(userJSON.inner);
+            }
+
+
+            // Display table from selection
+            $('#sidebarList').on('click', 'a', function()
+            {
+                var select = outer.inner.find(item => item.id === this.id);
+
+                displayTable((userMode ? outer : select), select)
+            });
+
+            $('#testGridNav').on('click', 'a', function()
+            {
+                var i;
+                outer = userJSON.find(item => item.id === this.id);
+                
+                loadTerminal(userJSON, outer);
+                fillNavBar(outer.inner);
+                $('#testGrid').hide();
+            });
+
+
+            $('#dropdownMenu').on('click', 'a', function()
+            {
+                var i;
+                if(outer !== userJSON.find(item => item.id === this.id))
+                {
+                    $('#pageContent').hide();
+                    outer = userJSON.find(item => item.id === this.id);
+                    
+                    loadTerminal(userJSON, outer);
+                    fillNavBar(outer.inner);
+                    $('#testGrid').hide();
+                }
+            });
+
+            $(document).on("keyup", "#inputFilter", function()
+            {
+                var input = document.getElementById("inputFilter");
+                var filter = input.value.replace(/[^0-9a-z]/gi, '').toUpperCase();
+                var item = document.getElementById("sidebarList").getElementsByTagName('a');
+
+                for (var i = 0; i < item.length; i++)
+                {
+                    if((item[i].innerHTML.toUpperCase()).includes(filter))
+                    {
+                        item[i].style.display = "";
+                    }
+                    else
+                    {
+                        item[i].style.display = "none";
+                    }
+                }
+            });
+
+            $('#examInfo').popover();
         });
 
-        $('.popover-dismiss').popover({
-            trigger: 'focus'
-        });
+
+
+        function displayTable (outer, inner)
+        {
+            // Generate Header
+            var header=document.getElementById("tableHeader");
+
+            header.innerHTML = `
+                <h3 class="card-title mr-2" style="display: inline;">${inner.name}</h3>
+                <h5 class="card-subtitle text-muted" style="display: inline;">${inner.id}</h5>
+                <h5 class="card-title mb-0">Total Score = ${inner.score}%</h5>`;
+
+
+            //Generate Table
+            var table = document.getElementById("tableTests");
+            table.innerHTML ="";
+            var i;
+
+            var numQuestions = userMode ? outer.numQuestions : inner.numQuestions;
+
+
+            for(i=0; i<numQuestions; i++)
+            {
+                var row = document.createElement("tr");
+                var correct = outer.solutions[i] === inner.submitted[i];
+                row.innerHTML = `
+                    <td style = "text-align: center;">${i+1}</td>
+                    <td style = "text-align: center;${correct ?"" : " color: #ff0000;"}">${inner.submitted[i]}</td>
+                    <td style = "text-align: center;">${outer.solutions[i]}</td>`;
+                table.appendChild(row);
+            }
+
+            $('#pageContent').show();
+        }
+
+
+
+        function fillNavBar(navList)
+        {
+            // Clear List
+            document.getElementById("sidebarList").innerHTML="";
+
+            // Fill List
+            navList.forEach(function(item)
+            {
+                $('#sidebarList').append(`<a href="#" id=${item.id} class="list-group-item list-group-item-action" data-toggle="list">${item.name}</a>`);
+            });
+
+            $('#sidebar').show();
+        }
+
+
+
+        function fillGrid(testList)
+        {
+            let nav = document.getElementById("testGridNav");
+            let i,j;
+            let maxCols = 4;
+            let numRows=Math.ceil(testList.length/maxCols);
+
+            nav.innerHTML = "";
+            for(i=0; i<numRows; i++)
+            {
+                let row = document.createElement("div");
+                row.classList.add("card-deck", "mx-1", "my-3");
+
+                for(j=0; j<maxCols; j++)
+                {
+                    let pos=(i*maxCols)+j;
+                    let card = document.createElement("div");
+                    card.classList.add("card", "text-center");
+                    if(pos<testList.length)
+                    {
+                        card.innerHTML =`
+                            <a href="#" id="${testList[pos].id}"><h5 class="card-header text-info">${testList[pos].name}</h5></a>
+                            <div class="card-body">
+                                <h6 class="card-subtitle text-muted mb-2">${testList[pos].id}</h6>
+                                <h6 class="text-dark">Average Score: ${testList[pos].avgScore}%</h6>
+                                <h6 class="text-dark">Highest Score: ${testList[pos].highScore}%</h6>
+                                <h6 class="text-dark mb-0">Lowest Score: ${testList[pos].lowScore}%</h6>
+                            </div>`;
+                    }
+                    else 
+                    {
+                        card.classList.add("invisible");
+                    }
+                    row.appendChild(card);
+                }
+                nav.appendChild(row);
+            }
+
+            $('#testGrid').show();
+        }
+
+        function loadTerminal(testList, currentTest)
+        {
+            document.getElementById("terminalTestName").innerHTML = currentTest.name;
+
+            // consider adding something to prevent current selection
+            document.getElementById("dropdownMenu").innerHTML="";
+            testList.forEach(function(test)
+            {
+                $('#dropdownMenu').append(`<a class="dropdown-item" href="#" id="${test.id}">${test.name}</a>`);
+            });
+
+            document.getElementById("examInfo").setAttribute("data-content", `
+                <h5>ID: ${currentTest.id}</h5>
+                Average Score: ${currentTest.avgScore}%<br>
+                Highest Score: ${currentTest.highScore}%<br>
+                Lowest Score: ${currentTest.lowScore}%`);
+
+            $('#teacherTerminal').show();
+        }
+
+        function clearPage()
+        {
+            if(userMode)
+            {
+                $('#testGrid').show();
+                $('#sidebar').hide();
+            }
+            else
+            {
+                fillNavBar(userJSON.inner);
+            }
+
+            $('#pageContent').hide();   
+        }
+
     </script>
 
 </head>
 
 <body>
-
-    <!-- Top Navbar -->
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+
+        <!-- Top Navbar -->
         <header class="masthead mb-auto">
             <div class="inner">
-                <h3 class="masthead-brand">OptiGrader</h3>
+                <a href="#" onclick="clearPage()"><h3 class="masthead-brand">OptiGrader</h3><a>
                 <nav class="nav nav-masthead justify-content-center">
                     <a class="nav-link active" href="#">Home</a>
-                    <a class="nav-link" href="#">Settings</a>
                     <a class="nav-link " href="index.html">Sign Out</a>
                 </nav>
             </div>
         </header>
 
-
-        <div id="teacherMainDashboard" style="display:none;">
-
+        <!-- Test Grid (Teacher Exclusive) -->
+        <div style="display: none" id="testGrid">
             <div class="card w-75 mx-auto mt-3">
                 <h3 class="card-header text-center">
                     Select Exam To View
+                    <button type="button" style="position: absolute; right: 10px" class="btn btn-info btn-sm" data-toggle="modal" data-target="#addTestModal">Add New Exam
+                                </button>
                 </h3>
-                <div class="card-deck mx-1 my-3">
 
-                    <div class="card text-center">
-                        <a href="#"><h5 class="card-header text-info">Exam 1</h5></a>
-                        <div class="card-body">
-                            <h6 class="card-subtitle text-muted mb-2">q7D3jG05Df</h6>
-                            <h6 class="text-dark">Average Score: 77%</h6>
-                            <h6 class="text-dark">Highest Score: 95%</h6>
-                            <h6 class="text-dark mb-0">Lowest Score: 45%</h6>
-                        </div>
-                    </div>
-
-                    <div class="card text-center">
-                        <a href="#"><h5 class="card-header text-info text-center">Exam 2</h5></a>
-                        <div class="card-body">
-                            <h6 class="card-subtitle text-muted mb-2">q7D3jG05Df</h6>
-                            <h6 class="text-dark">Average Score: 77%</h6>
-                            <h6 class="text-dark">Highest Score: 95%</h6>
-                            <h6 class="text-dark mb-0">Lowest Score: 45%</h6>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <a href="#"><h5 class="card-header text-info text-center">Exam 3</h5></a>
-                        <div class="card-body">
-                            <h6 class="card-subtitle text-muted mb-2">q7D3jG05Df</h6>
-                            <h6 class="text-dark">Average Score: 77%</h6>
-                            <h6 class="text-dark">Highest Score: 95%</h6>
-                            <h6 class="text-dark mb-0">Lowest Score: 45%</h6>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <a href="#"><h5 class="card-header text-info text-center">Exam 4</h5></a>
-                        <div class="card-body">
-                            <h6 class="card-subtitle text-muted mb-2">q7D3jG05Df</h6>
-                            <h6 class="text-dark">Average Score: 77%</h6>
-                            <h6 class="text-dark">Highest Score: 95%</h6>
-                            <h6 class="text-dark mb-0">Lowest Score: 45%</h6>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body d-flex align-items-center justify-content-center">
-                            <h1 class="mb-0">
-                                <a href="#" data-toggle="modal" data-target="#addTestModal">
-                                    <span class="oi oi-plus text-info" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Add New Exam"></span>
-                                </a>
-                            </h1>
-                        </div>
-                    </div>
-
-                </div>
-
+                <div id="testGridNav"> </div>
             </div>
         </div>
 
-        <div class="container-fluid row mx-auto" id="teacherTestDashboard" style="display:none;">
-            <!-- Side Navbar -->
-            <div class="col-md-3 my-3 card bg-light" id="teacherSideBar">
-                <nav class="navbar navbar-light bg-light">
+        <!-- Page Container -->
+        <div class="container-fluid row mx-auto" id="dashboard">
+            
+            <!-- Sidebar Container -->
+            <div class="col-md-3 my-3 card bg-light" id="sidebar" style="display: none">
+
+                <!-- Teacher Terminal -->
+                <nav class="navbar navbar-light bg-light" style="display: none" id="teacherTerminal">
                     <ul class="nav nav-fill">
                         <li class="nav-item col">
-                            <h4 style="display:inline-block;">Chapter 1 - Some Test Name</h4>
+                            <h4 style="display:inline-block;" id="terminalTestName"></h4>
 
                             <!-- Test Info Popover -->
-                            <a href="#" tabindex="0" id="testInfoPopover" class="text-dark" data-toggle="popover" data-trigger="focus" data-html="true" data-content=
-                                    "<h5>ID: q7D3jG05Df</h5>
-                                    Average Score: 77%<br>
-                                    Highest Score: 95%<br>
-                                    Lowest Score: 45%"><span class="oi oi-eye"></span></a>
+                            <a href="#" tabindex="0" class="text-dark" data-toggle="popover" data-trigger="focus" data-html="true" id="examInfo"><span class="oi oi-eye"></span></a>
 
                         </li>
 
+                        <!-- Test Buttons -->
                         <li class="nav-item col">
                             <div class="btn-group d-flex" role="group" aria-label="Button group with nested dropdown">
                                 <button type="button" class="btn btn-info btn-sm w-100" data-toggle="modal" data-target="#addTestModal">
@@ -134,96 +397,42 @@
                                 </button>
 
                                 <div class="btn-group mr-auto" role="group">
-                                    <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle btn-sm w-100" data-toggle="dropdown"
+                                    <button type="button" class="btn btn-secondary dropdown-toggle btn-sm w-100" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">
                                         <span class="oi oi-menu" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Select Exam"></span>
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                        <a class="dropdown-item" href="#">Test 1</a>
-                                        <a class="dropdown-item" href="#">Test 2</a>
-                                        <a class="dropdown-item" href="#">Test 3</a>
-                                        <a class="dropdown-item" href="#">Test 4</a>
-                                    </div>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="dropdownMenu"></div>
                                 </div>
                             </div>
                         </li>
                     </ul>
                 </nav>
 
+                <!-- Sidebar -->
+                <div>
+                    <input class="form-control form-control my-2" type="text" placeholder="Search" aria-label="Search" id="inputFilter">
 
-                <input class="form-control form-control mb-2" type="text" placeholder="Student Name" aria-label="Search Student Name">
-
-                <div class="list-group card" id="list" style="height: 75vh; overflow-y:auto">
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-info">bladdiba</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Adam Bla</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Name thing</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Adam Bla</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Name thing</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Adam Bla</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Name thing</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Adam Bla</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Name thing</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Adam Bla</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Name thing</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Adam Bla</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Name thing</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">John Smith</a>
-
-
+                    <div class="list-group card" style="height: 75vh; overflow-y:auto" id="sidebarList"></div>
                 </div>
             </div>
 
 
             <!-- Page Content-->
-            <div class="col-md-9" >
+            <div class="col-md-9" id="pageContent" style="display: none">
                 <div class="card bg-light my-3">
-                    <div class="card-header">
-                        <h3 class="card-title mr-2" style="display: inline;">John Smith</h3>
-                        <h5 class="card-subtitle text-muted" style="display: inline;">jo123456</h5>
-                        <h5 class="card-title mb-0">Total Score = 50%</h5>
-                    </div>
-
-
+                    <div class="card-header" id="tableHeader"></div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="dashboardTable" class="table table-border table-hover" style="white-space: nowrap">
+                            <table class="table table-border table-hover" style="white-space: nowrap" id="dashboardTable">
                                 <thead>
                                 <tr>
                                     <th style = "text-align: center;">Question Number</th>
                                     <th style = "text-align: center;">Student Answer</th>
                                     <th style = "text-align: center;">Correct Answer</th>
-                                    <th style = "text-align: center;">Points Earned</th>
-                                    <th style = "text-align: center;">Points Possible</th>
                                 </tr>
                                 </thead>
 
-                                <tbody id="tableTests">
-                                <tr>
-                                    <td style = "text-align: center;">1</td>
-                                    <td style = "text-align: center; color: #ff0000;">C</td>
-                                    <td style = "text-align: center;">B</td>
-                                    <td style = "text-align: center;">0.0</td>
-                                    <td style = "text-align: center;">1.0</td>
-                                </tr>
-                                <tr>
-                                    <td style = "text-align: center;">2</td>
-                                    <td style = "text-align: center;">B</td>
-                                    <td style = "text-align: center;">B</td>
-                                    <td style = "text-align: center;">1.0</td>
-                                    <td style = "text-align: center;">1.0</td>
-                                </tr>
-                                </tbody>
+                                <tbody id="tableTests"></tbody>
                             </table>
                         </div>
                     </div>
@@ -231,128 +440,58 @@
             </div>
         </div>
 
-
-        <div class="container-fluid row mx-auto" id="studentDashboard" >
-            <!-- Side Navbar -->
-            <div class="col-md-3 my-3 card bg-light"  id="studentSideBar">
-                <input class="form-control form-control my-2" type="text" placeholder="Search Exam Name" aria-label="Search Exam Name">
-
-
-                <div class="list-group card" style="height:75vh; overflow-y:auto">
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-info">Exam 1 - Intro to Thermodynamics</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 2</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 3</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 4</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 5</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 6</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 7</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 8</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 9</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 10</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 11</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 12</a>
-                    <a href="#" class="list-group-item list-group-item-action list-group-item-light">Exam 13</a>
-                </div>
-            </div>
-
-
-            <!-- Page Content-->
-            <div class="col-md-9" >
-                <div class="card bg-light my-3">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0">Exam 1 - Intro to Thermodynamics</h3>
-                        <h5 class="card-subtitle mb-3 text-muted">Q3k4D6H8dj</h5>
-                        <h4 class="card-title mb-0">Total Score = 75%</h4>
+        <!-- Delete Modal -->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteTestModal" aria-hidden="true" id="deleteTestModal">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Delete Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="dashboardTable" class="table table-border table-hover" style="white-space: nowrap">
-                                <thead>
-                                <tr>
-                                    <th style = "text-align: center;">Question Number</th>
-                                    <th style = "text-align: center;">Student Answer</th>
-                                    <th style = "text-align: center;">Correct Answer</th>
-                                    <th style = "text-align: center;">Points Earned</th>
-                                    <th style = "text-align: center;">Points Possible</th>
-                                </tr>
-                                </thead>
-
-                                <tbody id="tableTests">
-                                <tr>
-                                    <td style = "text-align: center;">1</td>
-                                    <td style = "text-align: center; color: #ff0000;">C</td>
-                                    <td style = "text-align: center;">B</td>
-                                    <td style = "text-align: center;">0.0</td>
-                                    <td style = "text-align: center;">1.0</td>
-                                </tr>
-                                <tr>
-                                    <td style = "text-align: center;">2</td>
-                                    <td style = "text-align: center;">B</td>
-                                    <td style = "text-align: center;">B</td>
-                                    <td style = "text-align: center;">1.0</td>
-                                    <td style = "text-align: center;">1.0</td>
-                                </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this exam?
                     </div>
-                </div>
-            </div>
-
-
-            <!-- Delete Modal -->
-            <div class="modal fade" id="deleteTestModal" tabindex="-1" role="dialog" aria-labelledby="deleteTestModal" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle">Delete Confirmation</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            Are you sure you want to delete this exam?
-                        </div>
-                        <div class="modal-footer d-flex justify-content-center">
-                            <button type="button" class="btn btn-info">Yes</button>
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Add Modal -->
-            <div class="modal fade" id="addTestModal" tabindex="-1" role="dialog" aria-labelledby="addTestModal" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addTestModalTitle">Add New Exam</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form>
-                                <div class="form-group">
-                                    <label for="examName">Exam Name</label>
-                                    <input type="text" id="examName" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
-                                </div>
-                                <div class="form-group">
-                                    <label for="examKey">Exam Key</label>
-                                    <input type="text" id="examKey" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer d-flex justify-content-center">
-                            <button type="button" class="btn btn-info">Add</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="button" class="btn btn-info">Yes</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Add Modal -->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addTestModal" aria-hidden="true" id="addTestModal">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTestModalTitle">Add New Exam</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="examName">Exam Name</label>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"  id="examName">
+                            </div>
+                            <div class="form-group">
+                                <label for="examKey">Exam Key</label>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"  id="examKey">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="button" class="btn btn-info">Add</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 </body>
 </html>
