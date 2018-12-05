@@ -25,7 +25,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -186,19 +185,18 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     // Touching the screen calls this.
     @Override
     public void onUserInteraction() {
-        if (start && second)
-        {
+        if (start && second) {
             // If camera has been initialized and the screen has been pressed a second time (to confirm scantron contour).
             // Start processing image.  This code transforms, crops, and detects the answer circles.
             pressed = true;
             Log.i(TAG, "Screen pressed");
 
             // Approximates contour with less vertexes
-            MatOfPoint2f  m2f = new MatOfPoint2f();
+            MatOfPoint2f m2f = new MatOfPoint2f();
             maxContour.convertTo(m2f, CvType.CV_32FC2);
             double arc = Imgproc.arcLength(m2f, true);
             MatOfPoint2f approx = new MatOfPoint2f();
-            Imgproc.approxPolyDP(m2f, approx, arc*0.01, true);
+            Imgproc.approxPolyDP(m2f, approx, arc * 0.01, true);
             MatOfPoint contour = new MatOfPoint();
             approx.convertTo(contour, CvType.CV_32S);
 
@@ -271,7 +269,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             //Imgproc.drawContours(destImage, temp, -1, new Scalar(57, 255, 20), 2);
 
             // Isolate scantron answers
-            Rect scantron = new Rect(95, 275, 835, 225);
+            Rect scantron = new Rect(75, 275, 855, 225);
 
             // Crop image (filter out any unnecessary data)
             Mat cropped = new Mat(destImage, scantron);
@@ -284,91 +282,87 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             Mat incoming = new Mat(1080, 1920, CvType.CV_8UC4, new Scalar(0, 0, 0));
 
             // In order to insert cropped image into base material, have to adjust the Region of Interest.  Sad to say it took me 4 hours to figure this out with no help from the internet forums.
-            incoming.adjustROI(0, -(1080-scantron.height), 0, -(1920-scantron.width));
+            incoming.adjustROI(0, -(1080 - scantron.height), 0, -(1920 - scantron.width));
             cropped.copyTo(incoming);
-            incoming.adjustROI(0, 1080-scantron.height, 0, 1920-scantron.width);
+            incoming.adjustROI(0, 1080 - scantron.height, 0, 1920 - scantron.width);
 
             // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
             Mat circles = new Mat();
-            List<MatOfPoint> bub = new ArrayList<>();
-            Imgproc.cvtColor(incoming,mIntermediateMat, 7);
             //Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
+            Imgproc.cvtColor(incoming, mIntermediateMat, 7);
             Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
-            //Imgproc.findContours(mIntermediateMat, bub, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-            //            List<MatOfPoint> draft = new ArrayList<>();
-            //            for(MatOfPoint c : bub)
-            //            {
-            //                Rect rec = Imgproc.boundingRect(c);
-            //                int w = rec.width;
-            //                int h = rec.height;
-            //                double ratio = Math.max(w,h) / Math.min(w,h);
-            //
-            //                if(ratio >=  0.9 && ratio <= 1.1)
-            //                    draft.add(c);
-            //            }
-            //
-            //            if (draft.size() > 0)
-            //                Imgproc.drawContours(mRgba, draft, -1, new Scalar(57, 255, 20), 2);
-            //            }
+            List<Point> points = new ArrayList<Point>();
 
-
-            List<double[]> bubbles = new ArrayList<>();
             // Draw Hough Circles onto base material
-            for (int i = 0; i < circles.cols(); i++)
-            {
+            for (int i = 0; i < circles.cols(); i++) {
                 double[] vCircle = circles.get(0, i);
-                bubbles.add(vCircle);
 
-                //Moved output temporarily to after sorting
-                //Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
-                //int radius = (int) Math.round(vCircle[2]);
-                //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+                Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                int radius = (int) Math.round(vCircle[2]);
+                points.add(pt);
+
+                Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
             }
 
-
-            //WORK AREA
-            //sort bubbles based on X-axis
-            //Short on time, could think of better sort method
-            Collections.sort(bubbles, new Comparator<double[]>()
-            {
-                @Override
-                public int compare(double[] a, double[] b)
-                {
-                    if(a[0] < b[0])
-                        return -1;
-                    else if(a[0] > b[0])
-                        return 1;
+            // Sort by y axis (when holding phone upright)
+            Collections.sort(points, new Comparator<Point>() {
+                public int compare(Point o1, Point o2) {
+                    int result = 0;
+                    if (o1.x > o2.x)
+                        result = 1;
+                    else if (o1.x < o2.x)
+                        result = -1;
                     else
-                        return 0;
+                        result = 0;
+
+                    return result;
                 }
             });
-            for(int i = 0; i < bubbles.size(); i+=5)
-            {
-                List<double[]> question = new ArrayList<>();
-                for(int j = 0; j < 5; j++)
-                {
-                    question.add(bubbles.get(i+j));
-                    Point pt = new Point(Math.round(question.get(i+j)[0]), Math.round(question.get(i+j)[1]));
-                    int radius = (int) Math.round(question.get(i+j)[2]);
-                    Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+
+            // Group by 5s.  Only if number of answers is divisible by 5 (will crash otherwise)
+            List<List<Point>> points_grouped = new ArrayList<List<Point>>();
+            if (points.size() % 5 == 0) {
+                List<Point> temp;
+                for (int i = 0; i < points.size() / 5; i++) {
+                    temp = new ArrayList<>();
+
+                    temp.add(points.get(i * 5));
+                    temp.add(points.get(i * 5 + 1));
+                    temp.add(points.get(i * 5 + 2));
+                    temp.add(points.get(i * 5 + 3));
+                    temp.add(points.get(i * 5 + 4));
+
+                    points_grouped.add(temp);
                 }
-                //Sort 5 bubbles for each question based on y-axis.
-                //Collections.sort(question, new Comparator<double[]>()
-                //{
-                //    @Override
-                //    public int compare(double[] a, double[] b)
-                //    {
-                //        if(a[1] < b[1])
-                //            return -1;
-                //        else if(a[1] > b[1])
-                //            return 1;
-                //        else
-                //            return 0;
-                //        }
-                //});
             }
-            //END OF WORK AREA
+
+            // Sort each group by x axis to align with letters A, B, C, etc
+            for (List<Point> group : points_grouped)
+            {
+                Collections.sort(group, new Comparator<Point>()
+                {
+                    public int compare(Point o1, Point o2) {
+                        int result = 0;
+                        if (o1.y < o2.y)
+                            result = 1;
+                        else if (o1.y > o2.y)
+                            result = -1;
+                        else
+                            result = 0;
+
+                        return result;
+                    }
+                });
+            }
+
+            // If have all the circles, make circle in the letters A and C of question 1
+            if (points.size() % 5 == 0)
+            {
+                List<Point> group = points_grouped.get(0);
+                Imgproc.circle(incoming, group.get(0), 3, new Scalar(57, 255, 20), 2);
+                Imgproc.circle(incoming, group.get(2), 3, new Scalar(57, 255, 20), 2);
+            }
 
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
