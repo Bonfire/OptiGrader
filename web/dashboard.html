@@ -50,8 +50,18 @@
                     {name: "Shorty Smalls", id: "ss845068", score: 40, submitted: "DAADDDADDDDADDAAADDADDADA"},
                     {name: "Tester Testington", id: "tt274958", score: 80, submitted: "AABAAAAABAAAABAAAABAAABAA"}
                 ]
+           },
+           {
+                name: "Exam 3",
+                id: "F4dg2VG31",
+                avgScore: 0,
+                highScore: 0,
+                lowScore: 0,
+                numQuestions: 25,
+                solutions: "AAAAAAAAAAAAAAAAAAAAAAAAA",
+                inner: [ ]
            }
-        ]
+        ];
 
         var studentJSON =
         {
@@ -82,74 +92,30 @@
                     submitted: "CCCCACCCACCAACCCCCCCACCCC"
                 }
             ]
-        }
+        };
+
+        var emptyTeacher =
+        [
+        ];
 
 
         var BASE_URL = "https://" + window.location.hostname + ":8080/";
         var token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         var userJSON;
         var userMode;
-        
+        var showingGrid = 1;
+        var outer;
         // DOCUMENT READY
         $(document).ready(function ()
         {
-            $.ajax(
+            //RUN WITH MOCK DATA
             {
-              type: "POST",
-              url: BASE_URL + "test",
-              data: JSON.stringify(
-              {
-                "token": token
-              }),
-              dataType: "json",
-              success: function (data, textStatus, jqXHR)
-              {
-                //$("#serverErrorAlert").hide();
-                //$("#connectionFailedAlert").hide();
-              
-                if ($.isArray(data) && typeof data[0].name !== "undefined")
-                {
-                    console.log("teacher login")
-                }
-                else
-                {
-                    if(typeof data.name !== "undefined")
-                    {
-                        console.log("student login")
-                    }
-                }
-                console.log(data);
-              },
-              error: function (jqXHR, textStatus, errorThrown)
-              {
-                console.log("connection error");
-                
-                /*
-                if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
-                {
-                  console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
-                  
-                  if (jqXHR.responseJSON.error === "Invalid token received!")
-                  {
-                    document.cookie = "token=; Max-Age=0;";
-                    window.location.href = "login.html?logout=0";
-                  }
-                  
-                  document.getElementById("serverErrorAlert").innerHTML = jqXHR.responseJSON.error;
-                  $("#connectionFailedAlert").hide();
-                  $("#serverErrorAlert").show();
-                }
-                else
-                {
-                  $("#serverErrorAlert").hide();
-                  $("#connectionFailedAlert").show();
-                }*/
-              }
-            });
-
-            userMode = 1;
-            userJSON = userMode? teacherJSON: studentJSON;
-            var outer;
+                userMode = 1;
+                userJSON = userMode? teacherJSON : studentJSON;
+                //userJSON = emptyTeacher;
+            }
+            
+            //loadJSON();
 
             if(userMode)
             {
@@ -159,6 +125,15 @@
             {
                 outer = userJSON;
                 fillNavBar(userJSON.inner);
+            }
+
+
+            // RUN WITH MOCK DATA
+            {
+                userMode = 1;
+                //
+
+                
             }
 
 
@@ -173,6 +148,7 @@
             $('#testGridNav').on('click', 'a', function()
             {
                 var i;
+                showingGrid=0;
                 outer = userJSON.find(item => item.id === this.id);
                 
                 loadTerminal(userJSON, outer);
@@ -219,11 +195,10 @@
 
 
 
-        function displayTable (outer, inner)
+        function displayTable (container, inner)
         {
             // Generate Header
             var header=document.getElementById("tableHeader");
-
             header.innerHTML = `
                 <h3 class="card-title mr-2" style="display: inline;">${inner.name}</h3>
                 <h5 class="card-subtitle text-muted" style="display: inline;">${inner.id}</h5>
@@ -235,35 +210,41 @@
             table.innerHTML ="";
             var i;
 
-            var numQuestions = userMode ? outer.numQuestions : inner.numQuestions;
-
+            var numQuestions = userMode ? container.numQuestions : inner.numQuestions;
 
             for(i=0; i<numQuestions; i++)
             {
                 var row = document.createElement("tr");
-                var correct = outer.solutions[i] === inner.submitted[i];
+                var correct = container.solutions[i] === inner.submitted[i];
                 row.innerHTML = `
                     <td style = "text-align: center;">${i+1}</td>
                     <td style = "text-align: center;${correct ?"" : " color: #ff0000;"}">${inner.submitted[i]}</td>
-                    <td style = "text-align: center;">${outer.solutions[i]}</td>`;
+                    <td style = "text-align: center;">${container.solutions[i]}</td>`;
                 table.appendChild(row);
             }
 
             $('#pageContent').show();
         }
 
-
-
         function fillNavBar(navList)
         {
             // Clear List
             document.getElementById("sidebarList").innerHTML="";
-
-            // Fill List
-            navList.forEach(function(item)
+            if(navList.length > 0)
             {
-                $('#sidebarList').append(`<a href="#" id=${item.id} class="list-group-item list-group-item-action" data-toggle="list">${item.name}</a>`);
-            });
+                navList.forEach(function(item)
+                {
+                    $('#sidebarList').append(`<a href="#" id=${item.id} class="list-group-item list-group-item-action" data-toggle="list">${item.name}</a>`);
+                });
+            }
+            else
+            {
+                var empty = document.createElement('div');
+                empty.classList.add("text-center", "text-muted", "font-weight-bold", "pt-3");
+                empty.innerHTML = "No Students Enrolled";
+                document.getElementById('sidebarList').appendChild(empty);
+            }
+            
 
             $('#sidebar').show();
         }
@@ -278,36 +259,47 @@
             let numRows=Math.ceil(testList.length/maxCols);
 
             nav.innerHTML = "";
-            for(i=0; i<numRows; i++)
+            if(testList.length > 0)
             {
-                let row = document.createElement("div");
-                row.classList.add("card-deck", "mx-1", "my-3");
-
-                for(j=0; j<maxCols; j++)
+                for(i=0; i<numRows; i++)
                 {
-                    let pos=(i*maxCols)+j;
-                    let card = document.createElement("div");
-                    card.classList.add("card", "text-center");
-                    if(pos<testList.length)
-                    {
-                        card.innerHTML =`
-                            <a href="#" id="${testList[pos].id}"><h5 class="card-header text-info">${testList[pos].name}</h5></a>
-                            <div class="card-body">
-                                <h6 class="card-subtitle text-muted mb-2">${testList[pos].id}</h6>
-                                <h6 class="text-dark">Average Score: ${testList[pos].avgScore}%</h6>
-                                <h6 class="text-dark">Highest Score: ${testList[pos].highScore}%</h6>
-                                <h6 class="text-dark mb-0">Lowest Score: ${testList[pos].lowScore}%</h6>
-                            </div>`;
-                    }
-                    else 
-                    {
-                        card.classList.add("invisible");
-                    }
-                    row.appendChild(card);
-                }
-                nav.appendChild(row);
-            }
+                    let row = document.createElement("div");
+                    row.classList.add("card-deck", "mx-1", "my-3");
 
+                    for(j=0; j<maxCols; j++)
+                    {
+                        let pos=(i*maxCols)+j;
+                        let card = document.createElement("div");
+                        card.classList.add("card", "text-center");
+                        if(pos<testList.length)
+                        {
+                            card.innerHTML =`
+                                <a href="#" id="${testList[pos].id}"><h5 class="card-header text-info">${testList[pos].name}</h5></a>
+                                <div class="card-body">
+                                    <h6 class="card-subtitle text-muted mb-2">${testList[pos].id}</h6>
+                                    <h6 class="text-dark">Average Score: ${testList[pos].avgScore}%</h6>
+                                    <h6 class="text-dark">Highest Score: ${testList[pos].highScore}%</h6>
+                                    <h6 class="text-dark mb-0">Lowest Score: ${testList[pos].lowScore}%</h6>
+                                </div>`;
+                        }
+                        else 
+                        {
+                            card.classList.add("invisible");
+                        }
+                        row.appendChild(card);
+                    }
+                    nav.appendChild(row);
+                }
+            }
+            else
+            {
+                var empty = document.createElement('div');
+                empty.classList.add("text-center", "text-muted", "pt-5", "py-5");
+                empty.innerHTML = `<h5>No exams have been created. 
+                                    <a class="text-dark" href="" data-toggle="modal" data-target="#addTestModal">Create one now!</a></h5>`;
+                nav.appendChild(empty);
+            }
+            showingGrid = 1;
             $('#testGrid').show();
         }
 
@@ -335,7 +327,7 @@
         {
             if(userMode)
             {
-                $('#testGrid').show();
+                fillGrid(userJSON);
                 $('#sidebar').hide();
             }
             else
@@ -344,6 +336,116 @@
             }
 
             $('#pageContent').hide();   
+        }
+
+        function addExam(){
+            var examName = document.getElementById("newExamName").value;
+            var examKey = document.getElementById("newExamKey").value;
+            
+            if(examKey !== "" && examName !== "")
+            {
+                $.ajax(
+                {
+                  type: "POST",
+                  url: BASE_URL + "test",
+                  data: JSON.stringify(
+                  {
+                    "token": token,
+                    "action": "create",
+                    "testName": examName,
+                    "solutions": examKey
+                  }),
+                  dataType: "json",
+                  success: function (data, textStatus, jqXHR)
+                  {
+                    if(typeof data.status !== "undefined")
+                    {
+                        document.getElementById('responseModalBody').innerHTML = data.code;
+                        $('#addTestModal').modal('hide');
+                        $('#responseModal').modal('show');
+                        document.getElementById('newExamKey').value ="";
+                        document.getElementById('newExamName').value ="";
+                        $('#addTestAlert').collapse('hide');
+                        
+                        loadJSON();
+                        
+                        if(showingGrid)
+                        {
+                            clearPage();
+                        }
+                        else
+                        {
+                            loadTerminal(userJSON, outer);
+                        }
+                        
+                    }
+                  },
+                  error: function (jqXHR, textStatus, errorThrown)
+                  {
+                    console.log("connection error");
+                  }
+                });
+            }
+            else
+            {
+                $('#addTestAlert').collapse('show');
+            }
+        }
+
+        function loadJSON(){
+            $.ajax(
+            {
+              type: "POST",
+              url: BASE_URL + "test",
+              data: JSON.stringify(
+              {
+                "token": token
+              }),
+              dataType: "json",
+              success: function (data, textStatus, jqXHR)
+              {
+                //$("#serverErrorAlert").hide();
+                //$("#connectionFailedAlert").hide();
+              
+                if ($.isArray(data) && typeof data[0].name !== "undefined")
+                {
+                    userMode = 1;
+                    userJSON = data;
+                }
+                else
+                {
+                    if(typeof data.name !== "undefined")
+                    {
+                        userMode = 0;
+                        userJSON = data;
+                    }
+                }
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                console.log("connection error");
+                /*
+                if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
+                {
+                  console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
+                  
+                  if (jqXHR.responseJSON.error === "Invalid token received!")
+                  {
+                    document.cookie = "token=; Max-Age=0;";
+                    window.location.href = "login.html?logout=0";
+                  }
+                  
+                  document.getElementById("serverErrorAlert").innerHTML = jqXHR.responseJSON.error;
+                  $("#connectionFailedAlert").hide();
+                  $("#serverErrorAlert").show();
+                }
+                else
+                {
+                  $("#serverErrorAlert").hide();
+                  $("#connectionFailedAlert").show();
+                }*/
+              }
+            });
         }
 
     </script>
@@ -429,6 +531,7 @@
             <div class="col-md-9" id="pageContent" style="display: none">
                 <div class="card bg-light my-3">
                     <div class="card-header" id="tableHeader"></div>
+                    <a href="#" tabindex="0" class="text-dark" data-toggle="popover" data-trigger="focus" data-html="true" id="examInfo2"><span class="oi oi-eye"></span></a>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-border table-hover" style="white-space: nowrap" id="dashboardTable">
@@ -480,21 +583,39 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <div class="alert alert-danger collapse" role="alert" id="addTestAlert" style="z-index: 1">
+        Please fill out all fields.
+    </div>
                         <form>
                             <div class="form-group">
-                                <label for="examName">Exam Name</label>
-                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"  id="examName">
+                                <label for="examName">Exam Name*</label>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"  id="newExamName">
                             </div>
                             <div class="form-group">
-                                <label for="examKey">Exam Key</label>
-                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"  id="examKey">
+                                <label for="examKey">Exam Key*</label>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"  id="newExamKey">
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
-                        <button type="button" class="btn btn-info">Add</button>
+                        <button type="button" onclick="addExam()" class="btn btn-info">Add</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Modal -->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="responseModal" aria-hidden="true" id="responseModal">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="responseModalTitle">Add New Exam</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="responseModalBody" class="modal-body"></div>
                 </div>
             </div>
         </div>
