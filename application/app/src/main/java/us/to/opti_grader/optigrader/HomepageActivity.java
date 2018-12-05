@@ -28,7 +28,7 @@ public class HomepageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 session.logoutUser();
-                Intent i = new Intent(HomepageActivity.this, LoginActivity.class);
+                Intent i = new Intent(HomepageActivity.this, MainActivity.class);
                 startActivity(i);
                 finish();
 

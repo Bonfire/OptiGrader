@@ -41,7 +41,8 @@ public class LoginActivity extends AppCompatActivity {
     private String login;
     private String password;
     private ProgressDialog pDialog;
-    private String login_url = "http://10.0.2.2:80/member/login.php";
+    private String login_url = "https://optigrader.mahabal.org:8080/login";
+    //private String login_url = "http://10.0.2.2:80/member/login.php";
     private SessionHandler session;
 
 
