@@ -11,8 +11,8 @@ public class SessionHandler {
     private static final String KEY_USERNAME = "login";
     private static final String KEY_EXPIRES = "expires";
     private static final String KEY_FULL_NAME = "full_name";
-    private static final String KEY_F_NAME = "first_name";
-    private static final String KEY_L_NAME = "last_name";
+    private static final String KEY_F_NAME = "firstName";
+    private static final String KEY_L_NAME = "lastName";
     private static final String KEY_EMPTY = "";
     private Context mContext;
     private SharedPreferences.Editor mEditor;

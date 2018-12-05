@@ -34,11 +34,13 @@ import us.to.optigrader.optigrader.R;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
     private static final String KEY_STATUS = "status";
     private static final String KEY_MESSAGE = "message";
     private static final String KEY_FULL_NAME = "full_name";
-    private static final String KEY_F_NAME = "first_name";
-    private static final String KEY_L_NAME = "last_name";
+    private static final String KEY_F_NAME = "firstName";
+    private static final String KEY_L_NAME = "lastName";
     private static final String KEY_NID = "id";
     private static final String KEY_USERNAME = "login";
     private static final String KEY_PASSWORD = "password";
@@ -177,7 +179,7 @@ public class RegisterActivity extends AppCompatActivity {
             request.put(KEY_PASSWORD, password);
             request.put(KEY_F_NAME, fName);
             request.put(KEY_L_NAME, lName);
-            request.put(KEY_NID, NID);
+            //request.put(KEY_NID, NID);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -186,10 +188,11 @@ public class RegisterActivity extends AppCompatActivity {
                 (Request.Method.POST, register_url, request, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        Log.d(TAG, response.toString());
                         //pDialog.dismiss();
                         try {
                             //Check if user got registered successfully
-                            if (response.getInt(KEY_STATUS) == 0) {
+                            if (response.has("token")) {
                                 //Set the user session
                                 session.loginUser(login,fName,lName);
                                 loadHomepage();
@@ -200,6 +203,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 emailEdit.requestFocus();
 
                             }else{
+
                                 Toast.makeText(getApplicationContext(),
                                         response.getString(KEY_MESSAGE), Toast.LENGTH_SHORT).show();
 
@@ -213,6 +217,7 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //pDialog.dismiss();
+                        Log.d("error.Response", error.toString());
 
                         //Display error message whenever an error occurs
                         Toast.makeText(getApplicationContext(),

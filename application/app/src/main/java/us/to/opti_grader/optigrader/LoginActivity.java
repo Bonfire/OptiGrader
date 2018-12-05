@@ -31,8 +31,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final String KEY_STATUS = "status";
     private static final String KEY_MESSAGE = "message";
     private static final String KEY_FULL_NAME = "full_name";
-    private static final String KEY_F_NAME = "first_name";
-    private static final String KEY_L_NAME = "last_name";
+    private static final String KEY_F_NAME = "firstName";
+    private static final String KEY_L_NAME = "lastName";
     private static final String KEY_USERNAME = "login";
     private static final String KEY_PASSWORD = "password";
     private static final String KEY_EMPTY = "";
@@ -88,13 +88,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    public void openCapture(View v){
-
-        Intent openCapture = new Intent(this, CameraActivity.class);
-        startActivity(openCapture);
-
-
-    }
 
     // copy test
 
@@ -117,8 +110,9 @@ public class LoginActivity extends AppCompatActivity {
                         try {
                             //Check if user got logged in successfully
 
-                            if (response.getInt(KEY_STATUS) == 0) {
-                                session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
+                            if (response.has("token")) {
+                                //session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
+                                session.loginUser(login,"dummy","dummy");
                                 loadHomepage();
 
                             }else{
