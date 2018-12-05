@@ -107,14 +107,18 @@
                 //$("#serverErrorAlert").hide();
                 //$("#connectionFailedAlert").hide();
               
-                if (typeof data.status !== "undefined")
+                if ($.isArray(data) && typeof data[0].name !== "undefined")
                 {
-                  console.log(data);
+                    console.log("teacher login")
                 }
                 else
                 {
-                    console.log("connection success but data.status undefined");
+                    if(typeof data.name !== "undefined")
+                    {
+                        console.log("student login")
+                    }
                 }
+                console.log(data);
               },
               error: function (jqXHR, textStatus, errorThrown)
               {
