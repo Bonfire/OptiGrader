@@ -64,15 +64,10 @@ public class RegisterActivity extends AppCompatActivity {
     private String fName;
     private String lName;
 
-
-
-
-
     private ProgressDialog pDialog;
     private String register_url = "https://optigrader.mahabal.org:8080/register";
     //private String register_url = "http://10.0.2.2:80/member/register.php";
     private SessionHandler session;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
