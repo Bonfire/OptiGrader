@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,10 @@ public class HomepageActivity extends AppCompatActivity {
     private static final String KEY_USERNAME = "login";
     private static final String KEY_SCORE= "score";
     private static final String KEY_MESSAGE = "message";
+    private static final String KEY_ANSWER = "submitted";
+    private static final String KEY_TESTID= "id";
+    private EditText etTestID;
+    private String testID;
     String score = "null";
 
     @Override
@@ -38,7 +43,11 @@ public class HomepageActivity extends AppCompatActivity {
         //welcomeText.setText("Welcome "+user.getFullName()+", your session will expire on "+user.getSessionExpiryDate());
         welcomeText.setText("Welcome "+user.getFullName()+", your score is "+ showGrade(user));
 
+        Button gradeBtn = findViewById(R.id.gradeBtn);
         Button logoutBtn = findViewById(R.id.logoutBtn);
+        etTestID = (EditText)findViewById(R.id.etTestid);
+
+
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +59,80 @@ public class HomepageActivity extends AppCompatActivity {
 
             }
         });
+
+        gradeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testID=etTestID.getText().toString();
+                Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
+                startActivity(i);
+
+                sendAns("cameraactivityanswers", testID);
+                //finish();
+
+            }
+        });
+    }
+
+    private void loadHomepage() {
+        Intent i = new Intent(getApplicationContext(), HomepageActivity.class);
+        startActivity(i);
+        finish();
+
+    }
+
+    private String sendAns(String userAnswer, String userTest) {
+        //displayLoader();
+
+
+        JSONObject request = new JSONObject();
+        try {
+            //Populate the request parameters
+            request.put(KEY_ANSWER, userAnswer);
+            request.put(KEY_TESTID, userTest);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest jsArrayRequest = new JsonObjectRequest
+                (Request.Method.POST, login_url, request, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        //pDialog.dismiss();
+                        try {
+                            //Check if user got logged in successfully
+
+                            if (response.has("token")) {
+
+                                loadHomepage();;
+
+
+                            }else{
+                                Toast.makeText(getApplicationContext(),
+                                        response.getString(KEY_MESSAGE), Toast.LENGTH_SHORT).show();
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //pDialog.dismiss();
+
+                        //Display error message whenever an error occurs
+                        Toast.makeText(getApplicationContext(),
+                                error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsArrayRequest);
+        return userAnswer;
     }
 
     private String showGrade(user user) {
