@@ -139,11 +139,10 @@
                 var inputLastNameFieldValue = document.getElementById("inputLastName").value;
                 var inputEmailFieldValue = document.getElementById("inputEmail").value;
                 var inputPasswordFieldValue = document.getElementById("inputPassword").value;
-                var inputUserModeFieldValue = document.getElementById("user_mode").value;
+                var inputUserModeFieldValue = !!+document.getElementById("user_mode").value;
 
                 // Hash password with SHA-256
                 var hash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(inputPasswordFieldValue));
-
                 // Send registration information to the server.
                 $.ajax(
                     {
@@ -151,11 +150,11 @@
                         url: BASE_URL + "register",
                         data: JSON.stringify(
                             {
-                                "user_mode": inputUserModeFieldValue,
-                                "firstname": inputFirstNameFieldValue,
-                                "lastname": inputLastNameFieldValue,
                                 "login": inputEmailFieldValue,
-                                "password": hash
+                                "password": hash,
+                                "firstName": inputFirstNameFieldValue,
+                                "lastName": inputLastNameFieldValue,
+                                "teacher": inputUserModeFieldValue
                             }),
                         dataType: "json",
                         success: function (data, textStatus, jqXHR)
