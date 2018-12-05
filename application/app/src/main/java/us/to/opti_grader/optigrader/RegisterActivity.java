@@ -44,6 +44,8 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String KEY_NID = "id";
     private static final String KEY_USERNAME = "login";
     private static final String KEY_PASSWORD = "password";
+    private static final String KEY_TOKEN = "token";
+
     private static final String KEY_EMPTY = "";
 
     private EditText emailEdit;
@@ -192,9 +194,9 @@ public class RegisterActivity extends AppCompatActivity {
                         //pDialog.dismiss();
                         try {
                             //Check if user got registered successfully
-                            if (response.has("token")) {
+                            if (response.has(KEY_TOKEN)) {
                                 //Set the user session
-                                session.loginUser(login,fName,lName);
+                                session.loginUser(login,fName,lName, response.getString(KEY_TOKEN));
                                 loadHomepage();
 
                             }else if(response.getInt(KEY_STATUS) == 1){

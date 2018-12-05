@@ -20,14 +20,16 @@ import org.json.JSONObject;
 import us.to.optigrader.optigrader.R;
 
 public class HomepageActivity extends AppCompatActivity {
-    private String login_url = "https://optigrader.mahabal.org:8080/login";
+    private String login_url = "https://optigrader.mahabal.org:8080/test";
     private SessionHandler session;
     private static final String KEY_NID = "id";
     private static final String KEY_USERNAME = "login";
     private static final String KEY_SCORE= "score";
     private static final String KEY_MESSAGE = "message";
-    private static final String KEY_ANSWER = "submitted";
-    private static final String KEY_TESTID= "id";
+    private static final String KEY_ANSWER = "solutions";
+    private static final String KEY_TESTID= "testCode";
+    private static final String KEY_TOKEN = "token";
+
     private EditText etTestID;
     private String testID;
     String score = "null";
@@ -41,7 +43,7 @@ public class HomepageActivity extends AppCompatActivity {
         TextView welcomeText = findViewById(R.id.welcomeText);
 
         //welcomeText.setText("Welcome "+user.getFullName()+", your session will expire on "+user.getSessionExpiryDate());
-        welcomeText.setText("Welcome "+user.getFullName()+", your score is "+ showGrade(user));
+        welcomeText.setText("Welcome user your score is "+ "null");
 
         Button gradeBtn = findViewById(R.id.gradeBtn);
         Button logoutBtn = findViewById(R.id.logoutBtn);
@@ -64,10 +66,10 @@ public class HomepageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 testID=etTestID.getText().toString();
-                Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
-                startActivity(i);
+                //Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
+                //startActivity(i);
 
-                sendAns("cameraactivityanswers", testID);
+                sendAns("BACBDABCCB", "YLPU", session.getUserDetails().getToken());
                 //finish();
 
             }
@@ -81,7 +83,7 @@ public class HomepageActivity extends AppCompatActivity {
 
     }
 
-    private String sendAns(String userAnswer, String userTest) {
+    private String sendAns(String userAnswer, String userTest, String usertoken) {
         //displayLoader();
 
 
@@ -90,6 +92,10 @@ public class HomepageActivity extends AppCompatActivity {
             //Populate the request parameters
             request.put(KEY_ANSWER, userAnswer);
             request.put(KEY_TESTID, userTest);
+            request.put("token", usertoken);
+            request.put("action", "submit");
+            //request.put("testName", "Exam 1");
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -102,14 +108,26 @@ public class HomepageActivity extends AppCompatActivity {
                         try {
                             //Check if user got logged in successfully
 
-                            if (response.has("token")) {
+                            if (response.has("status")) {
 
-                                loadHomepage();;
+                                Toast.makeText(getApplicationContext(),
+                                       response.getString("status"), Toast.LENGTH_SHORT).show();
+                                //response.getString("status");
+                                loadHomepage();
+
+
+
+                            }
+                            else if (response instanceof JSONObject) {
+
+                                Toast.makeText(getApplicationContext(),"got an object",Toast.LENGTH_SHORT).show();
+                                //response.getString("status");
+                                loadHomepage();
+
 
 
                             }else{
-                                Toast.makeText(getApplicationContext(),
-                                        response.getString(KEY_MESSAGE), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(),"error connecting",Toast.LENGTH_SHORT).show();
 
                             }
                         } catch (JSONException e) {

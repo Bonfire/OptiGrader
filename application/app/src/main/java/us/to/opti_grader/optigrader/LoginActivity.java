@@ -35,6 +35,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final String KEY_L_NAME = "lastName";
     private static final String KEY_USERNAME = "login";
     private static final String KEY_PASSWORD = "password";
+    private static final String KEY_TOKEN = "token";
+
     private static final String KEY_EMPTY = "";
     private EditText emailEdit;
     private EditText passwordEdit;
@@ -112,7 +114,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (response.has("token")) {
                                 //session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
-                                session.loginUser(login,"dummy","dummy");
+                                session.loginUser(login,"dummy","dummy",response.getString(KEY_TOKEN) );
                                 loadHomepage();
 
                             }else{
@@ -128,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        pDialog.dismiss();
+                        //pDialog.dismiss();
 
                         //Display error message whenever an error occurs
                         Toast.makeText(getApplicationContext(),
