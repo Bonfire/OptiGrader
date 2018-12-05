@@ -25,6 +25,9 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import us.to.optigrader.optigrader.R;
@@ -287,20 +290,85 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
             // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
             Mat circles = new Mat();
+            List<MatOfPoint> bub = new ArrayList<>();
+            Imgproc.cvtColor(incoming,mIntermediateMat, 7);
             //Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
-            Imgproc.cvtColor(incoming,mIntermediateMat, 7);                                                        
             Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
+            //Imgproc.findContours(mIntermediateMat, bub, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
+            //            List<MatOfPoint> draft = new ArrayList<>();
+            //            for(MatOfPoint c : bub)
+            //            {
+            //                Rect rec = Imgproc.boundingRect(c);
+            //                int w = rec.width;
+            //                int h = rec.height;
+            //                double ratio = Math.max(w,h) / Math.min(w,h);
+            //
+            //                if(ratio >=  0.9 && ratio <= 1.1)
+            //                    draft.add(c);
+            //            }
+            //
+            //            if (draft.size() > 0)
+            //                Imgproc.drawContours(mRgba, draft, -1, new Scalar(57, 255, 20), 2);
+            //            }
+
+
+            List<double[]> bubbles = new ArrayList<>();
             // Draw Hough Circles onto base material
             for (int i = 0; i < circles.cols(); i++)
             {
                 double[] vCircle = circles.get(0, i);
+                bubbles.add(vCircle);
 
-                Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
-                int radius = (int) Math.round(vCircle[2]);
-
-                Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+                //Moved output temporarily to after sorting
+                //Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                //int radius = (int) Math.round(vCircle[2]);
+                //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
             }
+
+
+            //WORK AREA
+            //sort bubbles based on X-axis
+            //Short on time, could think of better sort method
+            Collections.sort(bubbles, new Comparator<double[]>()
+            {
+                @Override
+                public int compare(double[] a, double[] b)
+                {
+                    if(a[0] < b[0])
+                        return -1;
+                    else if(a[0] > b[0])
+                        return 1;
+                    else
+                        return 0;
+                }
+            });
+            for(int i = 0; i < bubbles.size(); i+=5)
+            {
+                List<double[]> question = new ArrayList<>();
+                for(int j = 0; j < 5; j++)
+                {
+                    question.add(bubbles.get(i+j));
+                    Point pt = new Point(Math.round(question.get(i+j)[0]), Math.round(question.get(i+j)[1]));
+                    int radius = (int) Math.round(question.get(i+j)[2]);
+                    Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+                }
+                //Sort 5 bubbles for each question based on y-axis.
+                //Collections.sort(question, new Comparator<double[]>()
+                //{
+                //    @Override
+                //    public int compare(double[] a, double[] b)
+                //    {
+                //        if(a[1] < b[1])
+                //            return -1;
+                //        else if(a[1] > b[1])
+                //            return 1;
+                //        else
+                //            return 0;
+                //        }
+                //});
+            }
+            //END OF WORK AREA
 
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
