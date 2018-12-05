@@ -85,7 +85,8 @@
         }
 
 
-
+        var BASE_URL = "https://" + window.location.hostname + ":8080/";
+        var token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         var userJSON;
         var userMode;
         
@@ -98,23 +99,26 @@
               url: BASE_URL + "dashboard",
               data: JSON.stringify(
               {
-                "token": token,
-                "action": "get_contacts"
+                "token": token
               }),
               dataType: "json",
               success: function (data, textStatus, jqXHR)
               {
-                $("#serverErrorAlert").hide();
-                $("#connectionFailedAlert").hide();
+                //$("#serverErrorAlert").hide();
+                //$("#connectionFailedAlert").hide();
               
                 if (typeof data.status !== "undefined")
                 {
-                  console.log(data)
+                  console.log(data);
+                }
+                else
+                {
+                    console.log("connection success but data.status undefined");
                 }
               },
               error: function (jqXHR, textStatus, errorThrown)
               {
-                console.log("RIP AF");
+                console.log("connection error");
                 
                 /*
                 if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
@@ -137,7 +141,6 @@
                   $("#connectionFailedAlert").show();
                 }*/
               }
-              
             });
 
             userMode = 1;
