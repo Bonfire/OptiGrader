@@ -2,10 +2,8 @@ package us.to.opti_grader.optigrader;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
-import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.android.CameraBridgeViewBase;
@@ -18,23 +16,13 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
 
-import android.Manifest;
-import android.content.Context;
-import android.graphics.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +41,6 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     private Mat                    mIntermediateMat2;
 
     private CameraBridgeViewBase   mOpenCvCameraView;
-    private CameraManager          cameraManager;
-
-    private double                 nextFrameTime = 0;
 
     private boolean                pressed;
     private boolean                start = false;
@@ -156,39 +141,23 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
         if (!pressed && start)
         {
-            List<MatOfPoint> contours = new ArrayList<>();
-            List<MatOfPoint> contours_filtered = new ArrayList<>();
-            //Mat circles = new Mat();
-            //Imgproc.getPerspectiveTransform()
+            // This code is run after camera init and when the user has not pressed the screen
+            // If the user has pressed the screen, control is turned over to onUserInteraction()
 
-            // input frame has gray scale format
+            List<MatOfPoint> contours = new ArrayList<>();
+
+            // Save frame to global variable for onUserInteraction() processing
             altframe = inputFrame.rgba();
-            //Imgproc.bilateralFilter(inputFrame.rgba(), mIntermediateMat2, 5, 175, 175);
+
+            // Filtering
             Imgproc.GaussianBlur(inputFrame.gray(), mIntermediateMat2, new Size(5, 5), 0);
-            //Imgproc.Sobel();
-            //Imgproc.Laplacian();
-            //Imgproc.cvtColor(mIntermediateMat2, mRgba, Imgproc.COLOR_RGBA2GRAY);
             Imgproc.Canny(mIntermediateMat2, mIntermediateMat, 75, 200);
 
-            //if (System.currentTimeMillis()/1000 > nextFrameTime)
-            //    Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1.2, 1000, 100, 100, 5);
+            // Obtain contours, looking for scantron outline
             Imgproc.findContours(mIntermediateMat, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-            // Contours
-            MatOfPoint2f approx = new MatOfPoint2f();
-            MatOfPoint2f contour2f = new MatOfPoint2f();
-            double area;
-            /*for (MatOfPoint contour : contours)
-            {
-                contour.convertTo(contour2f, CvType.CV_32FC2);
-                //Imgproc.approxPolyDP(contour2f, approx,0.04*Imgproc.arcLength(contour2f, true), true);
-                area = Imgproc.contourArea(contour);
-
-                double length = approx.size().height;
-                if ((area > 30))
-                    contours_filtered.add(contour);
-            }*/
-
+            // Draw biggest contour onto the screen.  If user presses screen, they will select that
+            // contour and control will be moved to onUserInteraction()
             double maxContourArea = 0;
             for (MatOfPoint contour : contours) {
                 double tempContourArea = Imgproc.contourArea(contour);
@@ -202,35 +171,26 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             temp.add(maxContour);
             Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
 
+            // Draw contour only if one actually exists
             if (contours.size() > 0)
                 Imgproc.drawContours(mRgba, temp, -1, new Scalar(57, 255, 20), 2);
-
-            /* Hough Circles
-            if (System.currentTimeMillis()/1000 > nextFrameTime)
-            {
-                for (int i = 0; i < circles.cols(); i++) {
-                    double[] vCircle = circles.get(0, i);
-
-                    Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
-                    int radius = (int) Math.round(vCircle[2]);
-
-                    Imgproc.circle(mRgba, pt, radius, new Scalar(57, 255, 20), 2);
-                }
-
-                nextFrameTime = System.currentTimeMillis()/1000 + 1;
-            }*/
         }
 
         return mRgba;
     }
 
+    // This method is called by Android every time there is an input event by the user.
+    // Touching the screen calls this.
     @Override
     public void onUserInteraction() {
         if (start && second)
         {
+            // If camera has been initialized and the screen has been pressed a second time (to confirm scantron contour).
+            // Start processing image.  This code transforms, crops, and detects the answer circles.
             pressed = true;
             Log.i(TAG, "Screen pressed");
 
+            // Approximates contour with less vertexes
             MatOfPoint2f  m2f = new MatOfPoint2f();
             maxContour.convertTo(m2f, CvType.CV_32FC2);
             double arc = Imgproc.arcLength(m2f, true);
@@ -239,22 +199,17 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             MatOfPoint contour = new MatOfPoint();
             approx.convertTo(contour, CvType.CV_32S);
 
-            /*Rect points = Imgproc.minAreaRect(approx).boundingRect();
-            Point[] sortedPoints = new Point[4];
-
-            sortedPoints[0] = new Point(points.x, points.y);
-            sortedPoints[1] = new Point(points.x+points.width, points.y);
-            sortedPoints[2] = new Point(points.x, points.y+points.height);
-            sortedPoints[3] = new Point(points.x+points.width, points.y+points.height);*/
-
+            // Get the centroid of the image
             Moments moment = Imgproc.moments(contour);
             int x = (int) (moment.get_m10() / moment.get_m00());
             int y = (int) (moment.get_m01() / moment.get_m00());
 
             Point[] sortedPoints = new Point[4];
 
+            // Using that centroid, find the outermost points on the image's matrix.
             double[] data;
             int count = 0;
+            Log.i(TAG, "Screen pressed2: " + contour.rows());
             for (int i = 0; i < contour.rows(); i++) {
                 data = contour.get(i, 0);
                 double datax = data[0];
@@ -273,46 +228,70 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                     count++;
                 }
             }
-            // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER.  Can ignore for now.  Something for QA to tackle
+            // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER.  Can ignore for now.  Not that important
 
+            // Corners of material to perspective transform from
             MatOfPoint2f src = new MatOfPoint2f(
                     sortedPoints[0],
                     sortedPoints[1],
                     sortedPoints[2],
                     sortedPoints[3]);
 
+            // Corners of material to perspective transform to
             MatOfPoint2f dst = new MatOfPoint2f(
                     new Point(0, 0),
                     new Point(1100 - 1, 0),
                     new Point(0, 550 - 1),
                     new Point(1100 - 1, 550 - 1)
-            );
 
+
+            );
+            //                    new Point(0, 0),
+            //                    new Point(1920 - 1, 0),
+            //                    new Point(0, 1080 - 1),
+            //                    new Point(1920 - 1, 1080 - 1)
+
+            // Get transform to warp how we want
             Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
 
+            // Warp image/material with transform
             Mat destImage = new Mat();
             Imgproc.warpPerspective(altframe, destImage, warpMat, mRgba.size());
 
-            List<MatOfPoint> temp = new ArrayList<>();
+            // ignore
+            /*List<MatOfPoint> temp = new ArrayList<>();
             temp.add(new MatOfPoint(
                     new Point(0, 0),
                     new Point(0, 550),
                     new Point(1100, 550),
-                    new Point(1100, 0)));
+                    new Point(1100, 0)));*/
             //Imgproc.drawContours(destImage, temp, -1, new Scalar(57, 255, 20), 2);
 
+            // Isolate scantron answers
             Rect scantron = new Rect(95, 275, 835, 225);
+
+            // Crop image (filter out any unnecessary data)
             Mat cropped = new Mat(destImage, scantron);
+
+            // Reminder: OpenCV is in landscape!  This means if you're holding your phone upright, x axis is y and y axis is x.
+            // Coordinates (0,0) are the top right of the phone screen. (Still holding phone upright)
+
+            // Base material to display to users.  SCREEN-SPECIFC!  It only works with camera's initialized to the 1920*1080 resolution.
+            // Deviating from this resolution will result in an app crash bc cant place small material on bigger screen. rgb is 0,0,0 so all pixels initialized to black.
             Mat incoming = new Mat(1080, 1920, CvType.CV_8UC4, new Scalar(0, 0, 0));
+
+            // In order to insert cropped image into base material, have to adjust the Region of Interest.  Sad to say it took me 4 hours to figure this out with no help from the internet forums.
             incoming.adjustROI(0, -(1080-scantron.height), 0, -(1920-scantron.width));
             cropped.copyTo(incoming);
             incoming.adjustROI(0, 1080-scantron.height, 0, 1920-scantron.width);
 
+            // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
             Mat circles = new Mat();
-            Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
-            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 8, 5, 10);
+            //Imgproc.Canny(incoming, mIntermediateMat, 75, 200);
+            Imgproc.cvtColor(incoming,mIntermediateMat, 7);                                                        
+            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
 
-            // Hough Circles
+            // Draw Hough Circles onto base material
             for (int i = 0; i < circles.cols(); i++)
             {
                 double[] vCircle = circles.get(0, i);
@@ -323,10 +302,12 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                 Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
             }
 
+            // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
         }
         else if (pressed == false && start)
         {
+            // First press, stops onCameraFrame updating to show user the contour.  Another press and will start processing.
             second = true;
             pressed = true;
         }
