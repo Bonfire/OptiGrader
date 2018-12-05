@@ -25,4 +25,19 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="capture">Capture</string>
+    <string name="title_activity_jsonactivity">JSONactivity</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+
+    <string name="full_name">Full Name</string>
+    <string name="already_having_account">Already Having an Account?</string>
+    <string name="log_in">Log In</string>
+    <string name="not_having_account">Not Having an Account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="logout">Logout</string>
+    <string name="NID">NID</string>
+    <string name="gradeTest">Grade Test</string>
+    <string name="testID">Test ID</string>
+
 </resources>
