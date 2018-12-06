@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -276,8 +277,6 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                     new Point(1100 - 1, 0),
                     new Point(0, 550 - 1),
                     new Point(1100 - 1, 550 - 1)
-
-
             );
 
             // Get transform to warp how we want
@@ -286,15 +285,6 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             // Warp image/material with transform
             Mat destImage = new Mat();
             Imgproc.warpPerspective(altframe, destImage, warpMat, mRgba.size());
-
-            // ignore
-            /*List<MatOfPoint> temp = new ArrayList<>();
-            temp.add(new MatOfPoint(
-                    new Point(0, 0),
-                    new Point(0, 550),
-                    new Point(1100, 550),
-                    new Point(1100, 0)));*/
-            //Imgproc.drawContours(destImage, temp, -1, new Scalar(57, 255, 20), 2);
 
             // Isolate scantron answers
             Rect scantron = new Rect(75, 275, 855, 225);
@@ -350,7 +340,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
             // Group by 5s.  Only if number of answers is divisible by 5 (will crash otherwise)
             List<List<Point>> points_grouped = new ArrayList<List<Point>>();
-            if (points.size() % 5 == 0) {
+            if (points.size() == 250) {
                 List<Point> temp;
                 for (int i = 0; i < points.size() / 5; i++) {
                     temp = new ArrayList<>();
@@ -363,6 +353,15 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
                     points_grouped.add(temp);
                 }
+            }
+            else
+            {
+                second = false;
+                pressed = false;
+
+                Toast.makeText(getApplicationContext(),"Error: Invalid number of circles, try again.",Toast.LENGTH_LONG).show();
+
+                return;
             }
 
             // Sort each group by x axis to align with letters A, B, C, etc
