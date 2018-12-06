@@ -331,6 +331,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                 //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
             }
 
+
             // Sort by y axis (when holding phone upright)
             Collections.sort(points, new Comparator<Point>() {
                 public int compare(Point o1, Point o2) {
@@ -371,6 +372,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
                 return;
             }
+
 
             // Sort each group by x axis to align with letters A, B, C, etc
             for (List<Point> group : points_grouped)
