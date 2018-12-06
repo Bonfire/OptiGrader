@@ -18,6 +18,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -404,6 +406,9 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
             if(points_grouped.size() > 0)
             {
+                String tempAnswersl = "";
+                String tempAnswersr = "";
+
                 for (int i = 0; i < points_grouped.size(); i++)
                 {
                     int mostFilled = 100000;
@@ -431,21 +436,71 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                     {
                         selection[lCol] = selectIdx;
                         lCol++;
+
+                        switch (selectIdx)
+                        {
+                            case 0:
+                                tempAnswersl = tempAnswersl + "A";
+                                break;
+                            case 1:
+                                tempAnswersl = tempAnswersl + "B";
+                                break;
+                            case 2:
+                                tempAnswersl = tempAnswersl + "C";
+                                break;
+                            case 3:
+                                tempAnswersl = tempAnswersl + "D";
+                                break;
+                            case 4:
+                                tempAnswersl = tempAnswersl + "E";
+                                break;
+                            default:
+                                break;
+                        }
+
                         Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
                     }
                     else if(selectIdx != -1 && i % 2 == 1)
                     {
                         selection[rCol] = selectIdx;
                         rCol++;
+
+                        switch (selectIdx)
+                        {
+                            case 0:
+                                tempAnswersr = tempAnswersr + "A";
+                                break;
+                            case 1:
+                                tempAnswersr = tempAnswersr + "B";
+                                break;
+                            case 2:
+                                tempAnswersr = tempAnswersr + "C";
+                                break;
+                            case 3:
+                                tempAnswersr = tempAnswersr + "D";
+                                break;
+                            case 4:
+                                tempAnswersr = tempAnswersr + "E";
+                                break;
+                            default:
+                                break;
+                        }
+
                         Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(255, 255, 20), 2);
                     }
                 }
-                tempAnswers =  selection.toString();
+
+                tempAnswers =  tempAnswersl + tempAnswersr;
             }
 
             //sort array to string of numbers
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
+
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("tempAnswers", tempAnswers);
+            setResult(Activity.RESULT_OK,returnIntent);
+            finish();
 
         }
         else if (pressed == false && start)

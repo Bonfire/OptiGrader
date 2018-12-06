@@ -3,6 +3,7 @@ package us.to.opti_grader.optigrader;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -69,18 +70,27 @@ public class HomepageActivity extends AppCompatActivity {
                 //Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
                 //startActivity(i);
 
-                sendAns("BACBDABCCB", "YLPU", session.getUserDetails().getToken());
+                intent = new Intent(HomepageActivity.this, CameraActivity.class);
+                startActivityForResult(intent, 1);
                 //finish();
 
             }
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            String answers = data.getStringExtra("tempAnswers");
+            Log.i("Optigrader::HomepageAct", "ANSWERS SENT: " + answers);
+            sendAns(answers, "LMHX", session.getUserDetails().getToken());
+        }
+    }
+
     private void loadHomepage() {
         Intent i = new Intent(getApplicationContext(), HomepageActivity.class);
         startActivity(i);
         finish();
-
     }
 
     private String sendAns(String userAnswer, String userTest, String usertoken) {
@@ -175,7 +185,6 @@ public class HomepageActivity extends AppCompatActivity {
                             //Check if user got logged in successfully
 
                             if (response.getInt(KEY_SCORE)>0 && response.getInt(KEY_SCORE)<500) {
-
                                 score = response.getString(KEY_SCORE);
 
 
