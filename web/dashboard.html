@@ -185,7 +185,6 @@
         });
 
 
-
         function displayTable (container, inner)
         {
             // Generate Header
@@ -236,7 +235,6 @@
                 document.getElementById('sidebarList').appendChild(empty);
             }
             
-
             $('#sidebar').show();
         }
 
@@ -361,6 +359,7 @@
                         loadJSON();
                         outer=userJSON;
 
+                        consol.log("showing Grid" + showingGrid);
                         if(showingGrid)
                         {
                             clearPage();
@@ -405,6 +404,8 @@
                 {
                     outer=userJSON;
                 }
+                console.log("userMode: " + userMode);
+                console.log(userJSON);
                 
               },
               error: function (jqXHR, textStatus, errorThrown)
