@@ -108,14 +108,15 @@
         // DOCUMENT READY
         $(document).ready(function ()
         {
-            //RUN WITH MOCK DATA
+            /*
+            //RUN FOR MOCK DATA
             {
                 userMode = 1;
                 userJSON = userMode? teacherJSON : studentJSON;
                 //userJSON = emptyTeacher;
-            }
+            }*/
             
-            //loadJSON();
+            loadJSON();
 
             if(userMode)
             {
@@ -123,17 +124,7 @@
             }
             else
             {
-                outer = userJSON;
                 fillNavBar(userJSON.inner);
-            }
-
-
-            // RUN WITH MOCK DATA
-            {
-                userMode = 1;
-                //
-
-                
             }
 
 
@@ -368,7 +359,8 @@
                         $('#addTestAlert').collapse('hide');
                         
                         loadJSON();
-                        
+                        outer=userJSON;
+
                         if(showingGrid)
                         {
                             clearPage();
@@ -407,19 +399,13 @@
                 //$("#serverErrorAlert").hide();
                 //$("#connectionFailedAlert").hide();
               
-                if ($.isArray(data) && typeof data[0].name !== "undefined")
+                userMode = ($.isArray(data))? 1:0;
+                userJSON = data;
+                if(userMode)
                 {
-                    userMode = 1;
-                    userJSON = data;
+                    outer=userJSON;
                 }
-                else
-                {
-                    if(typeof data.name !== "undefined")
-                    {
-                        userMode = 0;
-                        userJSON = data;
-                    }
-                }
+                
               },
               error: function (jqXHR, textStatus, errorThrown)
               {
