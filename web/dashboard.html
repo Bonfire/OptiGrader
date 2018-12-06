@@ -261,7 +261,7 @@
             {
                 var empty = document.createElement('div');
                 empty.classList.add("text-center", "text-muted", "font-weight-bold", "pt-3");
-                empty.innerHTML = "No Students Enrolled";
+                empty.innerHTML = "No exams taken";
                 document.getElementById('sidebarList').appendChild(empty);
             }
             
@@ -449,7 +449,7 @@
                 {
                     if(pageToLoad === 0)
                     {
-                        outer = userJSON()
+                        outer = userJSON;
                         fillGrid(userJSON);
                         $('#sidebar').hide();
                         $('#pageContent').hide();  
