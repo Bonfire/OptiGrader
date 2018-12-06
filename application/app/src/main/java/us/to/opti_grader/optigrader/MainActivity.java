@@ -2,13 +2,12 @@ package us.to.opti_grader.optigrader;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.util.Log;
 import android.widget.TextView;
 
 import org.opencv.android.OpenCVLoader;
@@ -25,6 +24,7 @@ import us.to.optigrader.optigrader.R;
 
 public class MainActivity extends AppCompatActivity {
 
+    private SessionHandler session;
     String JSON_STRING;
 
     static {
@@ -39,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        session = new SessionHandler(getApplicationContext());
+        if(session.isLoggedIn()){
+            loadHomepage();
+        }
+        user user = session.getUserDetails();
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         int rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
@@ -46,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
         WindowManager.LayoutParams winParams = win.getAttributes();
         winParams.rotationAnimation = rotationAnimation;
         win.setAttributes(winParams);
+    }
+
+    private void loadHomepage() {
+        Intent i = new Intent(getApplicationContext(), HomepageActivity.class);
+        startActivity(i);
+        finish();
     }
 
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";

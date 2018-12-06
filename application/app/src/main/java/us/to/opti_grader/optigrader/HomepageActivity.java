@@ -88,7 +88,7 @@ public class HomepageActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(HomepageActivity.this, CameraActivity.class);
                 startActivityForResult(intent, 1);
-                //finish();
+                finish();
 
             }
         });
@@ -100,7 +100,7 @@ public class HomepageActivity extends AppCompatActivity {
             String answers = data.getStringExtra("tempAnswers");
             Log.i("Optigrader::HomepageAct", "ANSWERS SENT: " + answers);
             sendAns(answers, testID, session.getUserDetails().getToken());
-            //loadHomepage();
+            loadHomepage();
             //sendAns("AAAAA", "RSKQ", session.getUserDetails().getToken());
 
         }
