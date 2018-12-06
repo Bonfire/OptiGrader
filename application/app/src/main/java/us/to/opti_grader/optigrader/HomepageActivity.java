@@ -102,7 +102,7 @@ public class HomepageActivity extends AppCompatActivity {
             //Populate the request parameters
             request.put(KEY_ANSWER, userAnswer);
             request.put(KEY_TESTID, userTest);
-            request.put("token", usertoken);
+            request.put(KEY_TOKEN, usertoken);
             request.put("action", "submit");
             //request.put("testName", "Exam 1");
 
@@ -123,7 +123,8 @@ public class HomepageActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(),
                                        response.getString("status"), Toast.LENGTH_SHORT).show();
                                 //response.getString("status");
-                                loadHomepage();
+                                startActivity(getIntent());
+                                finish();
 
 
 
@@ -132,7 +133,8 @@ public class HomepageActivity extends AppCompatActivity {
 
                                 Toast.makeText(getApplicationContext(),"got an object",Toast.LENGTH_SHORT).show();
                                 //response.getString("status");
-                                loadHomepage();
+                                startActivity(getIntent());
+                                finish();
 
 
 
