@@ -83,6 +83,7 @@ public class HomepageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 testID=etTestID.getText().toString().toUpperCase();
+                Log.i("Optigrader::HomepageAct", "ANSWERS SENT: " + testID);
                 //Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
                 //startActivity(i);
 
@@ -97,8 +98,10 @@ public class HomepageActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
+            testID=etTestID.getText().toString().toUpperCase();
             String answers = data.getStringExtra("tempAnswers");
             Log.i("Optigrader::HomepageAct", "ANSWERS SENT: " + answers);
+            Log.i("Optigrader::HomepageAct", "TESTID: " + testID);
             sendAns(answers, testID, session.getUserDetails().getToken());
             //loadHomepage();
             //sendAns("AAAAA", "RSKQ", session.getUserDetails().getToken());
