@@ -392,7 +392,7 @@
                         document.getElementById('newExamName').value ="";
                         $('#addTestAlert').collapse('hide');
                         
-                        reloadJSON();                   
+                        reloadJSON(!showingGrid);             
                     }
                   },
                   error: function (jqXHR, textStatus, errorThrown)
@@ -407,7 +407,7 @@
             }
         }
 
-        function reloadJSON(){
+        function reloadJSON(pageToLoad){
             console.log("reloadJSON called");
             $.ajax(
             {
@@ -422,20 +422,37 @@
               {
                 console.log("reloadJSON success")
                 userJSON = data;
+
                 if(userMode)
                 {
-                    outer=userJSON;
-                    console.log("showing Grid" + showingGrid);
-                    if(showingGrid)
+                    if(pageToLoad === 0)
                     {
-                        clearPage();
+                        outer = userJSON()
+                        fillGrid(userJSON);
+                        $('#sidebar').hide();
+                        $('#pageContent').hide();  
                     }
-                    else
+                    else if(pageToLoad === 1) // leave currently selected exam
                     {
+                        outer = outer.inner.find(item => item.id === userJSON.id);
                         loadTerminal(userJSON, outer);
                     }
-
                 }
+                else
+                {
+                    if(pageToLoad === 0)
+                    {
+                        outer = userJSON;
+                        fillNavBar(userJSON.inner);
+                        $('#pageContent').hide();  
+                    }
+                }
+
+
+
+
+
+
                 console.log("userMode: " + userMode);
                 console.log(userJSON);
                 
