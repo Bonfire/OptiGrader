@@ -70,7 +70,7 @@ public class HomepageActivity extends AppCompatActivity {
                 //Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
                 //startActivity(i);
 
-                intent = new Intent(HomepageActivity.this, CameraActivity.class);
+                Intent intent = new Intent(HomepageActivity.this, CameraActivity.class);
                 startActivityForResult(intent, 1);
                 //finish();
 
