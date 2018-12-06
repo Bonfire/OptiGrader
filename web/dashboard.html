@@ -415,6 +415,10 @@
                 {
                     pageToLoad = currentPage;
                 }
+                else if(pageToLoad === 6)
+                {
+                    pageToLoad = 0;
+                }
 
                 if(userMode)
                 {
@@ -480,7 +484,7 @@
         <!-- Top Navbar -->
         <header class="masthead mb-auto">
             <div class="inner">
-                <a href="#" onclick="reloadJSON(5)"><h3 class="masthead-brand">OptiGrader</h3><a>
+                <a href="#" onclick="reloadJSON(6)"><h3 class="masthead-brand">OptiGrader</h3><a>
                 <nav class="nav nav-masthead justify-content-center">
                     <a class="nav-link active" href="#">Home</a>
                     <a class="nav-link " href="index.html">Sign Out</a>
