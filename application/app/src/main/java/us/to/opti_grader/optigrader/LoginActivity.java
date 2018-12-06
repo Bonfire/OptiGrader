@@ -26,10 +26,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import us.to.optigrader.optigrader.R;
+
+//import com.google.common.hash.Hashing;
 
 
 
@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                 login=emailEdit.getText().toString();
                 password=passwordEdit.getText().toString();
 
-                password=Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
+                password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
 
                 if (validateInputs()) {
                     login();

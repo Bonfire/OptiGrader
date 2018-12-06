@@ -2,7 +2,6 @@ package us.to.opti_grader.optigrader;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,20 +16,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.common.hash.Hashing;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import us.to.optigrader.optigrader.R;
@@ -109,7 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
                 lName = eLName.getText().toString().trim();
                 fName = eFName.getText().toString().trim();
                 NID = eNID.getText().toString().trim();
-                //password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
+
 
                 if (validateInputs()) {
                     registerUser();
@@ -250,149 +239,11 @@ public class RegisterActivity extends AppCompatActivity {
 
 
 
-
-
-    public void register(View v){
-        submitRegistration();
-    }
-
-
-
-    public JsonObject submitRegistration() {
-
-
-        EditText loginEdit=(EditText)findViewById(R.id.registerEM);
-        EditText passEdit=(EditText)findViewById(R.id.registerPW);
-        EditText fNameEdit=(EditText)findViewById(R.id.registerFN);
-        EditText lNameEdit=(EditText)findViewById(R.id.registerLN);
-
-        String login=loginEdit.getText().toString();
-        String password=passEdit.getText().toString();
-        String firstName=fNameEdit.getText().toString();
-        String lastName=lNameEdit.getText().toString();
-        String email=login;
-
-        try {
-            JsonObject payload = new JsonObject();
-
-
-            payload.addProperty("firstName", firstName);
-            payload.addProperty("lastname", lastName);
-            payload.addProperty("login", login);
-            payload.addProperty("password", password);
-
-            final Document document = Jsoup.connect("http://10.0.2.2:80/project/register.php")
-                    .requestBody(payload.toString())
-                    .ignoreContentType(true)
-                    .ignoreHttpErrors(true)
-                    .post();
-            //ensure that the response is not null
-            final String response = document.text();
-            //Assertions.assertNotNull(response, "API response was a null string");
-            // ensure that the response is  json object
-            final JsonObject object = new JsonParser().parse(response).getAsJsonObject();
-
-            //Assertions.assertNotNull(object, "API response was not a valid JSON object.");
-            return object;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Assertions.fail("unable to connect to API.");
-        return new JsonObject();
-
-    }
 //endoftest
 
-    public void writeJSON(View v) {
-        EditText loginEdit=(EditText)findViewById(R.id.registerEM);
-        EditText passEdit=(EditText)findViewById(R.id.registerPW);
-        EditText fNameEdit=(EditText)findViewById(R.id.registerFN);
-        EditText lNameEdit=(EditText)findViewById(R.id.registerLN);
-
-        String login=loginEdit.getText().toString();
-        String password=passEdit.getText().toString();
-        String firstName=fNameEdit.getText().toString();
-        String lastName=lNameEdit.getText().toString();
-        String email=login;
 
 
 
-        JSONObject payload = new JSONObject();
-        try {
 
-            payload.put("firstName", firstName);
-            payload.put("lastName", lastName);
-            payload.put("login", login);
-            payload.put("password", password);
-            payload.put("email", email);
 
-            /*
-            payload.put("firstName", "mike");
-            payload.put("lastName", "doe");
-            payload.put("login", "mike@gmail.com");
-            payload.put("password", "somepass");
-            payload.put("email", "email");
-            */
-
-            SendDeviceDetails sendDetails = new SendDeviceDetails();
-            sendDetails.execute("http://10.0.2.2:80/project/register.php", payload.toString());
-            finish();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        //return payload;
-
-    }
-
-    private class SendDeviceDetails extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            String data = "";
-
-            HttpURLConnection httpURLConnection = null;
-            try {
-
-                httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
-                httpURLConnection.setRequestMethod("POST");
-
-                //testing
-                //httpURLConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-
-                httpURLConnection.setDoOutput(true);
-
-                DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-                wr.writeBytes(/*"PostData=" + */params[1]);
-                wr.flush();
-                wr.close();
-
-                InputStream in = httpURLConnection.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(in);
-
-                int inputStreamData = inputStreamReader.read();
-                while (inputStreamData != -1) {
-                    char current = (char) inputStreamData;
-                    inputStreamData = inputStreamReader.read();
-                    data += current;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (httpURLConnection != null) {
-                    httpURLConnection.disconnect();
-                }
-                //finish();
-            }
-
-            return data;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            Log.e("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
-        }
-    }
 }
