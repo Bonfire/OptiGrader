@@ -22,8 +22,10 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +53,10 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     private String                 tempAnswers;
 
     MatOfPoint                     maxContour;
+
+    private Button btnConfirm;
+    private Button btnRetry;
+
 
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -95,6 +101,28 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_view);
         mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        btnConfirm = (Button)findViewById(R.id.button_confirm);
+        btnRetry = (Button)findViewById(R.id.button_retry);
+
+        btnConfirm.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                
+            }
+        });
+
+        btnRetry.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+            }
+        });
+
     }
 
     @Override
