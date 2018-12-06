@@ -16,6 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import us.to.optigrader.optigrader.R;
 
@@ -107,6 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
                 lName = eLName.getText().toString().trim();
                 fName = eFName.getText().toString().trim();
                 NID = eNID.getText().toString().trim();
+                //password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
 
                 if (validateInputs()) {
                     registerUser();
@@ -181,6 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerUser() {
 
         JSONObject request = new JSONObject();
+        password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
         try {
             //Populate the request parameters
             request.put(KEY_USERNAME, login);
