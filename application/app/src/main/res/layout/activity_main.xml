@@ -44,19 +44,5 @@
 
         android:onClick="gotoRegister" />
 
-    <Button
-        android:id="@+id/ocvButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:layout_marginEnd="148dp"
-        android:layout_marginStart="148dp"
-        android:onClick="CameraActivity"
-        android:text="OpenCV"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
 
 </android.support.constraint.ConstraintLayout>

@@ -48,12 +48,6 @@ public class MainActivity extends AppCompatActivity {
         win.setAttributes(winParams);
     }
 
-    public void CameraActivity(View view) {
-        Intent intent = new Intent(this, CameraActivity.class);
-
-        startActivity(intent);
-    }
-
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     public void gotoSignIn(View v){
