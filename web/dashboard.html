@@ -261,7 +261,15 @@
             {
                 var empty = document.createElement('div');
                 empty.classList.add("text-center", "text-muted", "font-weight-bold", "pt-3");
-                empty.innerHTML = "No exams taken";
+                if(userMode)
+                {
+                    empty.innerHTML = "No students enrolled";
+                }
+                else
+                {
+                    empty.innerHTML = "No exams taken";
+                }
+                
                 document.getElementById('sidebarList').appendChild(empty);
             }
             
