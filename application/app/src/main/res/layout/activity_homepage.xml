@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="123dp"
         android:layout_marginStart="123dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="108dp"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -52,29 +52,31 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        android:layout_marginTop="48dp"
         android:ems="10"
         android:hint="@string/testID"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/manualText" />
+        tools:layout_editor_absoluteY="279dp" />
 
     <EditText
         android:id="@+id/manualText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="8dp"
         android:ems="10"
-        android:hint="Enter Answers Here"
+        android:hint="enter answers here"
         android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/etTestid"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/welcomeText" />
+        app:layout_constraintTop_toBottomOf="@+id/welcomeText"
+        app:layout_constraintVertical_bias="0.115" />
 
     <Button
         android:id="@+id/manualBtn"
