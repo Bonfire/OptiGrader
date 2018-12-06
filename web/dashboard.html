@@ -118,12 +118,15 @@
             
             loadJSON();
 
+            console.log("user on initial load: " + userMode);
             if(userMode)
             {
+                console.log("load teacher");
                 fillGrid(userJSON);
             }
             else
             {
+                console.log("load student");
                 fillNavBar(userJSON.inner);
             }
 
@@ -131,6 +134,7 @@
             // Display table from selection
             $('#sidebarList').on('click', 'a', function()
             {
+                console.log("sidebar clicked");
                 var select = outer.inner.find(item => item.id === this.id);
 
                 displayTable((userMode ? outer : select), select)
@@ -138,6 +142,7 @@
 
             $('#testGridNav').on('click', 'a', function()
             {
+                console.log("test grid clicked");
                 var i;
                 showingGrid=0;
                 outer = userJSON.find(item => item.id === this.id);
@@ -150,6 +155,7 @@
 
             $('#dropdownMenu').on('click', 'a', function()
             {
+                console.log("dropdown opened");
                 var i;
                 if(outer !== userJSON.find(item => item.id === this.id))
                 {
@@ -187,6 +193,7 @@
 
         function displayTable (container, inner)
         {
+            console.log("displayTable called");
             // Generate Header
             var header=document.getElementById("tableHeader");
             header.innerHTML = `
@@ -218,6 +225,7 @@
 
         function fillNavBar(navList)
         {
+            console.log("fillNavBar called");
             // Clear List
             document.getElementById("sidebarList").innerHTML="";
             if(navList.length > 0)
@@ -242,6 +250,7 @@
 
         function fillGrid(testList)
         {
+            console.log("fillGrid called");
             let nav = document.getElementById("testGridNav");
             let i,j;
             let maxCols = 4;
@@ -250,6 +259,7 @@
             nav.innerHTML = "";
             if(testList.length > 0)
             {
+                console.log("full grid");
                 for(i=0; i<numRows; i++)
                 {
                     let row = document.createElement("div");
@@ -282,6 +292,7 @@
             }
             else
             {
+                console.log("empty grid");
                 var empty = document.createElement('div');
                 empty.classList.add("text-center", "text-muted", "pt-5", "py-5");
                 empty.innerHTML = `<h5>No exams have been created. 
@@ -294,6 +305,7 @@
 
         function loadTerminal(testList, currentTest)
         {
+            console.log("loadTerminal called");
             document.getElementById("terminalTestName").innerHTML = currentTest.name;
 
             // consider adding something to prevent current selection
@@ -314,6 +326,7 @@
 
         function clearPage()
         {
+            console.log("clearPage called");
             if(userMode)
             {
                 fillGrid(userJSON);
@@ -328,6 +341,7 @@
         }
 
         function addExam(){
+            console.log("addExam called");
             var examName = document.getElementById("newExamName").value;
             var examKey = document.getElementById("newExamKey").value;
             
@@ -384,6 +398,7 @@
         }
 
         function loadJSON(){
+            console.log("loadJSON called");
             $.ajax(
             {
               type: "POST",
