@@ -53,6 +53,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     private boolean                pressed;
     private boolean                start = false;
     private boolean                second = false;
+    private boolean                finale = false;
     private String                 tempAnswers;
 
     MatOfPoint                     maxContour;
@@ -113,7 +114,14 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             @Override
             public void onClick(View v)
             {
-                
+                //for each click
+                //click 1 anywhere: selects scantron
+                //click 2: confirms scantron, shows bubbles
+                if(second != true)
+                    second = true;
+                    //click 3: end activity, sends answers
+                else
+                    finale = true;
             }
         });
 
@@ -122,10 +130,10 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             @Override
             public void onClick(View v)
             {
-
+                pressed = false;
+                second = false;
             }
         });
-
     }
 
     @Override
@@ -218,7 +226,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     // Touching the screen calls this.
     @Override
     public void onUserInteraction() {
-        if (start && second) {
+        if (start && second && !finale) {
             // If camera has been initialized and the screen has been pressed a second time (to confirm scantron contour).
             // Start processing image.  This code transforms, crops, and detects the answer circles.
             pressed = true;
@@ -485,7 +493,7 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
                                 break;
                         }
 
-                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(255, 255, 20), 2);
+                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
                     }
                 }
 
@@ -496,16 +504,17 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
             mRgba = incoming;
 
+        }
+        if(finale)
+        {
             Intent returnIntent = new Intent();
             returnIntent.putExtra("tempAnswers", tempAnswers);
             setResult(Activity.RESULT_OK,returnIntent);
             finish();
-
         }
         else if (pressed == false && start)
         {
             // First press, stops onCameraFrame updating to show user the contour.  Another press and will start processing.
-            second = true;
             pressed = true;
         }
     }
