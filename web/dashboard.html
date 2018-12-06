@@ -282,7 +282,7 @@
                         document.getElementById('newExamName').value ="";
                         $('#addTestAlert').collapse('hide');
                         
-                        reloadJSON(($('#sideBar').is(":visible")) ? 3 : 1);             
+                        reloadJSON(($('#sideBar').is(":visible")) ? 2 : 0);             
                     }
                   },
                   error: function (jqXHR, textStatus, errorThrown)
@@ -365,7 +365,16 @@
                 },
                 error: function (jqXHR, textStatus, errorThrown)
                 {
-                    console.log("connection error");
+                    var json = jQuery.parseJSON(jqXHR.responseText);
+                    if (json !== undefined && json.error !== undefined && json.error === "Invalid session.")
+                    {
+                        token = "";
+                        window.location.href = "index.html"
+                    } 
+                    else 
+                    {
+                        console.log("Error " + textStatus + ": " + errorThrown + " - " + jqXHR.responseText)
+                    }
                 }
             });
         }
@@ -385,13 +394,22 @@
                 dataType: "json",
                 success: function (data, textStatus, jqXHR)
                 {
-                    userMode = ($.isArray(data))? 1:0;
+                    isTeacher = ($.isArray(data))? 1:0;
                     userJSON = data;
                     clearPage();
                 },
                 error: function (jqXHR, textStatus, errorThrown)
                 {
-                    console.log("connection error");
+                    var json = jQuery.parseJSON(jqXHR.responseText);
+                    if (json !== undefined && json.error !== undefined && json.error === "Invalid session.")
+                    {
+                        token = "";
+                        window.location.href = "index.html"
+                    } 
+                    else 
+                    {
+                        console.log("Error " + textStatus + ": " + errorThrown + " - " + jqXHR.responseText)
+                    }
                 }
             });
 
