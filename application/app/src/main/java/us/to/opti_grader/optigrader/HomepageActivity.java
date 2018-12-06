@@ -83,7 +83,9 @@ public class HomepageActivity extends AppCompatActivity {
         if (requestCode == 1) {
             String answers = data.getStringExtra("tempAnswers");
             Log.i("Optigrader::HomepageAct", "ANSWERS SENT: " + answers);
-            sendAns(answers, "LMHX", session.getUserDetails().getToken());
+            sendAns(answers, testID, session.getUserDetails().getToken());
+            sendAns("AAAAA", "RSKQ", session.getUserDetails().getToken());
+
         }
     }
 
