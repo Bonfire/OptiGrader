@@ -1,6 +1,43 @@
 <resources>
     <string name="app_name">OptiGrader</string>
-    <string name="enter_ID">Test ID</string>
-    <string name="button_send">Send</string>
-    <string name="main_message">Enter Your Test ID</string>
+    <string name="sign_in">Sign In</string>
+    <string name="register">Register</string>
+    <string name="title_activity_login">Sign in</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="confirm_email">Confirm Email</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm">Confirm</string>
+
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="capture">Capture</string>
+    <string name="title_activity_jsonactivity">JSONactivity</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+
+    <string name="full_name">Full Name</string>
+    <string name="already_having_account">Already Having an Account?</string>
+    <string name="log_in">Log In</string>
+    <string name="not_having_account">Not Having an Account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="logout">Logout</string>
+    <string name="NID">NID</string>
+    <string name="gradeTest">Scan Test</string>
+    <string name="testID">Test ID</string>
+
 </resources>
