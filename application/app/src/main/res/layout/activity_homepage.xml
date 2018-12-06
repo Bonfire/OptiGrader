@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="123dp"
         android:layout_marginStart="123dp"
-        android:layout_marginTop="112dp"
+        android:layout_marginTop="108dp"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -26,28 +26,24 @@
         android:layout_margin="5dp"
         android:layout_marginBottom="48dp"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="8dp"
         android:background="#aaa"
         android:text="@string/logout"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gradeBtn"
-        app:layout_constraintVertical_bias="0.918" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/gradeBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="149dp"
-        android:layout_marginStart="147dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginTop="8dp"
         android:text="@string/gradeTest"
+        app:layout_constraintBottom_toTopOf="@+id/logoutBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.421"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etTestid" />
 
     <EditText
@@ -56,12 +52,45 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        android:layout_marginTop="140dp"
         android:ems="10"
+        android:hint="@string/testID"
         android:inputType="textPersonName"
-        android:text="@string/testID"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/welcomeText" />
+        tools:layout_editor_absoluteY="279dp" />
+
+    <EditText
+        android:id="@+id/manualText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="84dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="enter answers here"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/etTestid"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcomeText"
+        app:layout_constraintVertical_bias="0.115" />
+
+    <Button
+        android:id="@+id/manualBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        android:text="grade manually"
+        app:layout_constraintBottom_toTopOf="@+id/logoutBtn"
+        app:layout_constraintEnd_toStartOf="@+id/gradeBtn"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etTestid" />
 
 </android.support.constraint.ConstraintLayout>

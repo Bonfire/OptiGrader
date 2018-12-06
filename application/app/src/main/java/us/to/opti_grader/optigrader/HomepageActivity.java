@@ -32,7 +32,9 @@ public class HomepageActivity extends AppCompatActivity {
     private static final String KEY_TOKEN = "token";
 
     private EditText etTestID;
+    private EditText etmanual;
     private String testID;
+    private String manualSolution;
     String score = "null";
 
     @Override
@@ -44,11 +46,14 @@ public class HomepageActivity extends AppCompatActivity {
         TextView welcomeText = findViewById(R.id.welcomeText);
 
         //welcomeText.setText("Welcome "+user.getFullName()+", your session will expire on "+user.getSessionExpiryDate());
-        welcomeText.setText("Welcome user your score is "+ "null");
+        welcomeText.setText("Welcome User");
 
         Button gradeBtn = findViewById(R.id.gradeBtn);
         Button logoutBtn = findViewById(R.id.logoutBtn);
+        Button manualBtn = findViewById(R.id.manualBtn);
         etTestID = (EditText)findViewById(R.id.etTestid);
+        etmanual = (EditText)findViewById(R.id.manualText);
+
 
 
 
@@ -63,10 +68,21 @@ public class HomepageActivity extends AppCompatActivity {
             }
         });
 
+        manualBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testID=etTestID.getText().toString().toUpperCase();
+                manualSolution=etmanual.getText().toString().toUpperCase();
+                sendAns(manualSolution, testID, session.getUserDetails().getToken());
+                //loadHomepage();
+
+            }
+        });
+
         gradeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                testID=etTestID.getText().toString();
+                testID=etTestID.getText().toString().toUpperCase();
                 //Intent i = new Intent(HomepageActivity.this, CameraActivity.class);
                 //startActivity(i);
 
@@ -84,7 +100,8 @@ public class HomepageActivity extends AppCompatActivity {
             String answers = data.getStringExtra("tempAnswers");
             Log.i("Optigrader::HomepageAct", "ANSWERS SENT: " + answers);
             sendAns(answers, testID, session.getUserDetails().getToken());
-            sendAns("AAAAA", "RSKQ", session.getUserDetails().getToken());
+            //loadHomepage();
+            //sendAns("AAAAA", "RSKQ", session.getUserDetails().getToken());
 
         }
     }

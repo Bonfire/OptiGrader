@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Retrieve the data entered in the edit texts
 
-                login=emailEdit.getText().toString();
+                login=emailEdit.getText().toString().toLowerCase();
                 password=passwordEdit.getText().toString();
 
                 try {
@@ -135,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (response.has("token")) {
                                 //session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
-                                session.loginUser(login,"dummy","dummy", response.getString(KEY_TOKEN));
+                                session.loginUser(login,"fName","fName", response.getString(KEY_TOKEN));
                                 loadHomepage();
 
                             }else if(response instanceof JSONObject ){
