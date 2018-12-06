@@ -103,8 +103,8 @@
         var token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         var userJSON;
         var userMode;
-        var showingGrid = 1;
         var outer;
+        var currentPage = 0;
         // DOCUMENT READY
         $(document).ready(function ()
         {
@@ -154,6 +154,7 @@
             // Display table from selection
             $('#sidebarList').on('click', 'a', function()
             {
+                currentPage=3;
                 console.log("sidebar clicked");
                 var select = outer.inner.find(item => item.id === this.id);
 
@@ -164,7 +165,7 @@
             {
                 console.log("test grid clicked");
                 var i;
-                showingGrid=0;
+                currentPage=1;
                 outer = userJSON.find(item => item.id === this.id);
                 
                 loadTerminal(userJSON, outer);
@@ -216,6 +217,7 @@
             console.log("displayTable called");
             // Generate Header
             var header=document.getElementById("tableHeader");
+            currentPage = 3;
             header.innerHTML = `
                 <h3 class="card-title mr-2" style="display: inline;">${inner.name}</h3>
                 <h5 class="card-subtitle text-muted" style="display: inline;">${inner.id}</h5>
@@ -319,7 +321,7 @@
                                     <a class="text-dark" href="" data-toggle="modal" data-target="#addTestModal">Create one now!</a></h5>`;
                 nav.appendChild(empty);
             }
-            showingGrid = 1;
+            currentPage = 0;
             $('#testGrid').show();
         }
 
@@ -342,22 +344,6 @@
                 Lowest Score: ${currentTest.lowScore}%`);
 
             $('#teacherTerminal').show();
-        }
-
-        function clearPage()
-        {
-            console.log("clearPage called");
-            if(userMode)
-            {
-                fillGrid(userJSON);
-                $('#sidebar').hide();
-            }
-            else
-            {
-                fillNavBar(userJSON.inner);
-            }
-
-            $('#pageContent').hide();   
         }
 
         function addExam(){
@@ -392,7 +378,7 @@
                         document.getElementById('newExamName').value ="";
                         $('#addTestAlert').collapse('hide');
                         
-                        reloadJSON(!showingGrid);             
+                        reloadJSON(currentPage);             
                     }
                   },
                   error: function (jqXHR, textStatus, errorThrown)
@@ -421,7 +407,14 @@
               success: function (data, textStatus, jqXHR)
               {
                 console.log("reloadJSON success")
+                console.log("userMode: " + userMode);
+                console.log("pageToLoad: "+pageToLoad);
+
                 userJSON = data;
+                if(pageToLoad === 5)
+                {
+                    pageToLoad = currentPage;
+                }
 
                 if(userMode)
                 {
@@ -447,13 +440,6 @@
                         $('#pageContent').hide();  
                     }
                 }
-
-
-
-
-
-
-                console.log("userMode: " + userMode);
                 console.log(userJSON);
                 
               },
@@ -494,7 +480,7 @@
         <!-- Top Navbar -->
         <header class="masthead mb-auto">
             <div class="inner">
-                <a href="#" onclick="clearPage()"><h3 class="masthead-brand">OptiGrader</h3><a>
+                <a href="#" onclick="reloadJSON(5)"><h3 class="masthead-brand">OptiGrader</h3><a>
                 <nav class="nav nav-masthead justify-content-center">
                     <a class="nav-link active" href="#">Home</a>
                     <a class="nav-link " href="index.html">Sign Out</a>
