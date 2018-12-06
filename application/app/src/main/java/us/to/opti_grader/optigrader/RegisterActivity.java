@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -45,6 +46,8 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String KEY_USERNAME = "login";
     private static final String KEY_PASSWORD = "password";
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_PROF = "user_mode";
+
 
     private static final String KEY_EMPTY = "";
 
@@ -63,6 +66,8 @@ public class RegisterActivity extends AppCompatActivity {
     private String NID;
     private String fName;
     private String lName;
+
+    CheckBox ch1;
 
 
 
@@ -89,6 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
         eNID = findViewById(R.id.registerNID);
 
         Button registerbtn = findViewById(R.id.registerBtn);
+        ch1=(CheckBox)findViewById(R.id.instructorcheckBox);
 
         registerbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,7 +187,13 @@ public class RegisterActivity extends AppCompatActivity {
             request.put(KEY_PASSWORD, password);
             request.put(KEY_F_NAME, fName);
             request.put(KEY_L_NAME, lName);
-            //request.put(KEY_NID, NID);
+            request.put(KEY_NID, NID);
+
+            if(ch1.isChecked()){
+                request.put(KEY_PROF, "1");
+            }
+            else
+                request.put(KEY_PROF, "0");
 
         } catch (JSONException e) {
             e.printStackTrace();
