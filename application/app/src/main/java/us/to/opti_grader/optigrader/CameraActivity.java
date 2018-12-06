@@ -212,8 +212,8 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
             List<MatOfPoint> temp = new ArrayList<>();
             temp.add(maxContour);
-            Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
-
+            //Imgproc.cvtColor(mIntermediateMat, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
+            mRgba = altframe;
             // Draw contour only if one actually exists
             if (contours.size() > 0)
                 Imgproc.drawContours(mRgba, temp, -1, new Scalar(57, 255, 20), 2);
@@ -404,8 +404,8 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
 
             //Core.bitwise_and(thresh, mask, conjunction);
 
-            //  //Grading
-            //            //Loop of grouped points
+            //Grading
+            //Loop of grouped points
             int selection[] = new int[points_grouped.size()];
             int lCol = 0;
             int rCol = 25;
