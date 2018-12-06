@@ -53,7 +53,6 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
     private boolean                pressed;
     private boolean                start = false;
     private boolean                second = false;
-    private boolean                finale = false;
     private String                 tempAnswers;
 
     MatOfPoint                     maxContour;
@@ -114,14 +113,300 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
             @Override
             public void onClick(View v)
             {
-                //for each click
-                //click 1 anywhere: selects scantron
-                //click 2: confirms scantron, shows bubbles
-                if(second != true)
+                if (start && second) {
+                    // If camera has been initialized and the screen has been pressed a second time (to confirm scantron contour).
+                    // Start processing image.  This code transforms, crops, and detects the answer circles.
+                    pressed = true;
+                    Log.i(TAG, "Screen pressed");
+
+                    // Approximates contour with less vertexes
+                    MatOfPoint2f m2f = new MatOfPoint2f();
+                    maxContour.convertTo(m2f, CvType.CV_32FC2);
+                    double arc = Imgproc.arcLength(m2f, true);
+                    MatOfPoint2f approx = new MatOfPoint2f();
+                    Imgproc.approxPolyDP(m2f, approx, arc * 0.01, true);
+                    MatOfPoint contour = new MatOfPoint();
+                    approx.convertTo(contour, CvType.CV_32S);
+
+                    // Get the centroid of the image
+                    Moments moment = Imgproc.moments(contour);
+                    int x = (int) (moment.get_m10() / moment.get_m00());
+                    int y = (int) (moment.get_m01() / moment.get_m00());
+
+                    Point[] sortedPoints = new Point[4];
+
+                    // Using that centroid, find the outermost points on the image's matrix.
+                    double[] data;
+                    int count = 0;
+                    Log.i(TAG, "Screen pressed2: " + contour.rows());
+                    for (int i = 0; i < contour.rows(); i++) {
+                        data = contour.get(i, 0);
+                        double datax = data[0];
+                        double datay = data[1];
+                        if (datax < x && datay < y) {
+                            sortedPoints[0] = new Point(datax, datay);
+                            count++;
+                        } else if (datax > x && datay < y) {
+                            sortedPoints[1] = new Point(datax, datay);
+                            count++;
+                        } else if (datax < x && datay > y) {
+                            sortedPoints[2] = new Point(datax, datay);
+                            count++;
+                        } else if (datax > x && datay > y) {
+                            sortedPoints[3] = new Point(datax, datay);
+                            count++;
+                        }
+                    }
+                    // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER.  Can ignore for now.  Not that important
+
+                    // Corners of material to perspective transform from
+                    MatOfPoint2f src = new MatOfPoint2f(
+                            sortedPoints[0],
+                            sortedPoints[1],
+                            sortedPoints[2],
+                            sortedPoints[3]);
+
+                    // Corners of material to perspective transform to
+                    MatOfPoint2f dst = new MatOfPoint2f(
+                            new Point(0, 0),
+                            new Point(1100 - 1, 0),
+                            new Point(0, 550 - 1),
+                            new Point(1100 - 1, 550 - 1)
+                    );
+
+                    // Get transform to warp how we want
+                    Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
+
+                    // Warp image/material with transform
+                    Mat destImage = new Mat();
+                    Imgproc.warpPerspective(altframe, destImage, warpMat, mRgba.size());
+
+                    // Isolate scantron answers
+                    Rect scantron = new Rect(75, 275, 855, 225);
+
+                    // Crop image (filter out any unnecessary data)
+                    Mat cropped = new Mat(destImage, scantron);
+
+                    // Reminder: OpenCV is in landscape!  This means if you're holding your phone upright, x axis is y and y axis is x.
+                    // Coordinates (0,0) are the top right of the phone screen. (Still holding phone upright)
+
+                    // Base material to display to users.  SCREEN-SPECIFC!  It only works with camera's initialized to the 1920*1080 resolution.
+                    // Deviating from this resolution will result in an app crash bc cant place small material on bigger screen. rgb is 0,0,0 so all pixels initialized to black.
+                    Mat incoming = new Mat(1080, 1920, CvType.CV_8UC4, new Scalar(0, 0, 0));
+
+                    // In order to insert cropped image into base material, have to adjust the Region of Interest.  Sad to say it took me 4 hours to figure this out with no help from the internet forums.
+                    incoming.adjustROI(0, -(1080 - scantron.height), 0, -(1920 - scantron.width));
+                    cropped.copyTo(incoming);
+                    incoming.adjustROI(0, 1080 - scantron.height, 0, 1920 - scantron.width);
+
+                    // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
+                    Mat circles = new Mat();
+                    //Convert color to gray
+                    Imgproc.cvtColor(incoming, mIntermediateMat, 7);
+                    Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
+
+                    List<Point> points = new ArrayList<Point>();
+
+                    // Draw Hough Circles onto base material
+                    for (int i = 0; i < circles.cols(); i++) {
+                        double[] vCircle = circles.get(0, i);
+
+                        Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
+                        int radius = (int) Math.round(vCircle[2]);
+                        points.add(pt);
+
+                        //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
+                    }
+
+
+                    // Sort by y axis (when holding phone upright)
+                    Collections.sort(points, new Comparator<Point>() {
+                        public int compare(Point o1, Point o2) {
+                            int result = 0;
+                            if (o1.x > o2.x)
+                                result = 1;
+                            else if (o1.x < o2.x)
+                                result = -1;
+                            else
+                                result = 0;
+
+                            return result;
+                        }
+                    });
+
+                    // Group by 5s.  Only if number of answers is divisible by 5 (will crash otherwise)
+                    List<List<Point>> points_grouped = new ArrayList<List<Point>>();
+                    if (points.size() == 250) {
+                        List<Point> temp;
+                        for (int i = 0; i < points.size() / 5; i++) {
+                            temp = new ArrayList<>();
+
+                            temp.add(points.get(i * 5));
+                            temp.add(points.get(i * 5 + 1));
+                            temp.add(points.get(i * 5 + 2));
+                            temp.add(points.get(i * 5 + 3));
+                            temp.add(points.get(i * 5 + 4));
+
+                            points_grouped.add(temp);
+                        }
+                    }
+                    else
+                    {
+                        second = false;
+                        pressed = false;
+
+                        Toast.makeText(getApplicationContext(),"Error: Invalid number of circles, try again.",Toast.LENGTH_LONG).show();
+
+                        return;
+                    }
+
+
+                    // Sort each group by x axis to align with letters A, B, C, etc
+                    for (List<Point> group : points_grouped)
+                    {
+                        Collections.sort(group, new Comparator<Point>()
+                        {
+                            public int compare(Point o1, Point o2) {
+                                int result = 0;
+                                if (o1.y < o2.y)
+                                    result = 1;
+                                else if (o1.y > o2.y)
+                                    result = -1;
+                                else
+                                    result = 0;
+
+                                return result;
+                            }
+                        });
+                    }
+
+                    // If have all the circles, make circle in the letters A and C of question 1
+                    //if (points.size() % 5 == 0)
+                    //{
+                    //    List<Point> group = points_grouped.get(0);
+                    //Imgproc.circle(incoming, group.get(0), 5, new Scalar(57, 255, 20), 2);
+                    //Imgproc.circle(incoming, group.get(2), 5, new Scalar(57, 255, 20), 2);
+                    //}
+
+                    Mat thresh = new Mat(incoming.size(), CvType.CV_8UC1);
+                    Imgproc.threshold(mIntermediateMat, thresh, 150, 250, Imgproc.THRESH_BINARY);
+
+                    //Core.bitwise_and(thresh, mask, conjunction);
+
+                    //Grading
+                    //Loop of grouped points
+                    int selection[] = new int[points_grouped.size()];
+                    int lCol = 0;
+                    int rCol = 25;
+                    // Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+
+                    if(points_grouped.size() > 0)
+                    {
+                        String tempAnswersl = "";
+                        String tempAnswersr = "";
+
+                        for (int i = 0; i < points_grouped.size(); i++)
+                        {
+                            int mostFilled = 100000;
+                            int selectIdx = -1;
+
+                            for (int j = 0; j < 5; j++)
+                            {
+                                Point cur = points_grouped.get(i).get(j);
+                                Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
+                                Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
+
+                                Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
+                                Core.bitwise_and(thresh, mask, conjunction);
+
+                                int countWhitePixels = Core.countNonZero(conjunction);
+
+                                if (countWhitePixels < mostFilled)
+                                {
+                                    mostFilled = countWhitePixels;
+                                    selectIdx = j;
+                                }
+                            }
+                            //add selected answer to array and output image
+                            if (selectIdx != -1 && i % 2 == 0)
+                            {
+                                selection[lCol] = selectIdx;
+                                lCol++;
+
+                                switch (selectIdx)
+                                {
+                                    case 0:
+                                        tempAnswersl = tempAnswersl + "A";
+                                        break;
+                                    case 1:
+                                        tempAnswersl = tempAnswersl + "B";
+                                        break;
+                                    case 2:
+                                        tempAnswersl = tempAnswersl + "C";
+                                        break;
+                                    case 3:
+                                        tempAnswersl = tempAnswersl + "D";
+                                        break;
+                                    case 4:
+                                        tempAnswersl = tempAnswersl + "E";
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
+                            }
+                            else if(selectIdx != -1 && i % 2 == 1)
+                            {
+                                selection[rCol] = selectIdx;
+                                rCol++;
+
+                                switch (selectIdx)
+                                {
+                                    case 0:
+                                        tempAnswersr = tempAnswersr + "A";
+                                        break;
+                                    case 1:
+                                        tempAnswersr = tempAnswersr + "B";
+                                        break;
+                                    case 2:
+                                        tempAnswersr = tempAnswersr + "C";
+                                        break;
+                                    case 3:
+                                        tempAnswersr = tempAnswersr + "D";
+                                        break;
+                                    case 4:
+                                        tempAnswersr = tempAnswersr + "E";
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
+                            }
+                        }
+
+                        tempAnswers =  tempAnswersl + tempAnswersr;
+                    }
+
+                    //sort array to string of numbers
+                    // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
+                    mRgba = incoming;
+                    second = false;
+                }
+                else if (pressed == false && start)
+                {
+                    // First press, stops onCameraFrame updating to show user the contour.  Another press and will start processing.
+                    pressed = true;
                     second = true;
-                    //click 3: end activity, sends answers
-                else
-                    finale = true;
+                }
+                else if (start)
+                {
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("tempAnswers", tempAnswers);
+                    setResult(Activity.RESULT_OK,returnIntent);
+                    finish();
+                }
             }
         });
 
@@ -220,304 +505,5 @@ public class CameraActivity extends AppCompatActivity implements CvCameraViewLis
         }
 
         return mRgba;
-    }
-
-    // This method is called by Android every time there is an input event by the user.
-    // Touching the screen calls this.
-    @Override
-    public void onUserInteraction() {
-        if (start && second && !finale) {
-            // If camera has been initialized and the screen has been pressed a second time (to confirm scantron contour).
-            // Start processing image.  This code transforms, crops, and detects the answer circles.
-            pressed = true;
-            Log.i(TAG, "Screen pressed");
-
-            // Approximates contour with less vertexes
-            MatOfPoint2f m2f = new MatOfPoint2f();
-            maxContour.convertTo(m2f, CvType.CV_32FC2);
-            double arc = Imgproc.arcLength(m2f, true);
-            MatOfPoint2f approx = new MatOfPoint2f();
-            Imgproc.approxPolyDP(m2f, approx, arc * 0.01, true);
-            MatOfPoint contour = new MatOfPoint();
-            approx.convertTo(contour, CvType.CV_32S);
-
-            // Get the centroid of the image
-            Moments moment = Imgproc.moments(contour);
-            int x = (int) (moment.get_m10() / moment.get_m00());
-            int y = (int) (moment.get_m01() / moment.get_m00());
-
-            Point[] sortedPoints = new Point[4];
-
-            // Using that centroid, find the outermost points on the image's matrix.
-            double[] data;
-            int count = 0;
-            Log.i(TAG, "Screen pressed2: " + contour.rows());
-            for (int i = 0; i < contour.rows(); i++) {
-                data = contour.get(i, 0);
-                double datax = data[0];
-                double datay = data[1];
-                if (datax < x && datay < y) {
-                    sortedPoints[0] = new Point(datax, datay);
-                    count++;
-                } else if (datax > x && datay < y) {
-                    sortedPoints[1] = new Point(datax, datay);
-                    count++;
-                } else if (datax < x && datay > y) {
-                    sortedPoints[2] = new Point(datax, datay);
-                    count++;
-                } else if (datax > x && datay > y) {
-                    sortedPoints[3] = new Point(datax, datay);
-                    count++;
-                }
-            }
-            // ^ BUG HERE WHERE NOT TAKING INTO ACCOUNT STRANGE CORNER.  Can ignore for now.  Not that important
-
-            // Corners of material to perspective transform from
-            MatOfPoint2f src = new MatOfPoint2f(
-                    sortedPoints[0],
-                    sortedPoints[1],
-                    sortedPoints[2],
-                    sortedPoints[3]);
-
-            // Corners of material to perspective transform to
-            MatOfPoint2f dst = new MatOfPoint2f(
-                    new Point(0, 0),
-                    new Point(1100 - 1, 0),
-                    new Point(0, 550 - 1),
-                    new Point(1100 - 1, 550 - 1)
-            );
-
-            // Get transform to warp how we want
-            Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
-
-            // Warp image/material with transform
-            Mat destImage = new Mat();
-            Imgproc.warpPerspective(altframe, destImage, warpMat, mRgba.size());
-
-            // Isolate scantron answers
-            Rect scantron = new Rect(75, 275, 855, 225);
-
-            // Crop image (filter out any unnecessary data)
-            Mat cropped = new Mat(destImage, scantron);
-
-            // Reminder: OpenCV is in landscape!  This means if you're holding your phone upright, x axis is y and y axis is x.
-            // Coordinates (0,0) are the top right of the phone screen. (Still holding phone upright)
-
-            // Base material to display to users.  SCREEN-SPECIFC!  It only works with camera's initialized to the 1920*1080 resolution.
-            // Deviating from this resolution will result in an app crash bc cant place small material on bigger screen. rgb is 0,0,0 so all pixels initialized to black.
-            Mat incoming = new Mat(1080, 1920, CvType.CV_8UC4, new Scalar(0, 0, 0));
-
-            // In order to insert cropped image into base material, have to adjust the Region of Interest.  Sad to say it took me 4 hours to figure this out with no help from the internet forums.
-            incoming.adjustROI(0, -(1080 - scantron.height), 0, -(1920 - scantron.width));
-            cropped.copyTo(incoming);
-            incoming.adjustROI(0, 1080 - scantron.height, 0, 1920 - scantron.width);
-
-            // Filtering and circle detection.  The Hough Circles params are *super* delicate, so treat with care.
-            Mat circles = new Mat();
-            //Convert color to gray
-            Imgproc.cvtColor(incoming, mIntermediateMat, 7);
-            Imgproc.HoughCircles(mIntermediateMat, circles, Imgproc.CV_HOUGH_GRADIENT, 1, 9, 200, 12, 5, 10);
-
-            List<Point> points = new ArrayList<Point>();
-
-            // Draw Hough Circles onto base material
-            for (int i = 0; i < circles.cols(); i++) {
-                double[] vCircle = circles.get(0, i);
-
-                Point pt = new Point(Math.round(vCircle[0]), Math.round(vCircle[1]));
-                int radius = (int) Math.round(vCircle[2]);
-                points.add(pt);
-
-                //Imgproc.circle(incoming, pt, radius, new Scalar(57, 255, 20), 2);
-            }
-
-
-            // Sort by y axis (when holding phone upright)
-            Collections.sort(points, new Comparator<Point>() {
-                public int compare(Point o1, Point o2) {
-                    int result = 0;
-                    if (o1.x > o2.x)
-                        result = 1;
-                    else if (o1.x < o2.x)
-                        result = -1;
-                    else
-                        result = 0;
-
-                    return result;
-                }
-            });
-
-            // Group by 5s.  Only if number of answers is divisible by 5 (will crash otherwise)
-            List<List<Point>> points_grouped = new ArrayList<List<Point>>();
-            if (points.size() == 250) {
-                List<Point> temp;
-                for (int i = 0; i < points.size() / 5; i++) {
-                    temp = new ArrayList<>();
-
-                    temp.add(points.get(i * 5));
-                    temp.add(points.get(i * 5 + 1));
-                    temp.add(points.get(i * 5 + 2));
-                    temp.add(points.get(i * 5 + 3));
-                    temp.add(points.get(i * 5 + 4));
-
-                    points_grouped.add(temp);
-                }
-            }
-            else
-            {
-                second = false;
-                pressed = false;
-
-                Toast.makeText(getApplicationContext(),"Error: Invalid number of circles, try again.",Toast.LENGTH_LONG).show();
-
-                return;
-            }
-
-
-            // Sort each group by x axis to align with letters A, B, C, etc
-            for (List<Point> group : points_grouped)
-            {
-                Collections.sort(group, new Comparator<Point>()
-                {
-                    public int compare(Point o1, Point o2) {
-                        int result = 0;
-                        if (o1.y < o2.y)
-                            result = 1;
-                        else if (o1.y > o2.y)
-                            result = -1;
-                        else
-                            result = 0;
-
-                        return result;
-                    }
-                });
-            }
-
-            // If have all the circles, make circle in the letters A and C of question 1
-            //if (points.size() % 5 == 0)
-            //{
-            //    List<Point> group = points_grouped.get(0);
-                //Imgproc.circle(incoming, group.get(0), 5, new Scalar(57, 255, 20), 2);
-                //Imgproc.circle(incoming, group.get(2), 5, new Scalar(57, 255, 20), 2);
-            //}
-
-            Mat thresh = new Mat(incoming.size(), CvType.CV_8UC1);
-            Imgproc.threshold(mIntermediateMat, thresh, 150, 250, Imgproc.THRESH_BINARY);
-
-            //Core.bitwise_and(thresh, mask, conjunction);
-
-            //Grading
-            //Loop of grouped points
-            int selection[] = new int[points_grouped.size()];
-            int lCol = 0;
-            int rCol = 25;
-           // Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
-
-            if(points_grouped.size() > 0)
-            {
-                String tempAnswersl = "";
-                String tempAnswersr = "";
-
-                for (int i = 0; i < points_grouped.size(); i++)
-                {
-                    int mostFilled = 100000;
-                    int selectIdx = -1;
-
-                    for (int j = 0; j < 5; j++)
-                    {
-                        Point cur = points_grouped.get(i).get(j);
-                        Mat mask = new Mat(incoming.size(), CvType.CV_8UC1, Scalar.all(0));
-                        Imgproc.circle(mask, cur, 6, new Scalar(57, 255, 20), 2);
-
-                        Mat conjunction = new Mat(circles.size(), CvType.CV_8UC1);
-                        Core.bitwise_and(thresh, mask, conjunction);
-
-                        int countWhitePixels = Core.countNonZero(conjunction);
-
-                        if (countWhitePixels < mostFilled)
-                        {
-                            mostFilled = countWhitePixels;
-                            selectIdx = j;
-                        }
-                    }
-                    //add selected answer to array and output image
-                    if (selectIdx != -1 && i % 2 == 0)
-                    {
-                        selection[lCol] = selectIdx;
-                        lCol++;
-
-                        switch (selectIdx)
-                        {
-                            case 0:
-                                tempAnswersl = tempAnswersl + "A";
-                                break;
-                            case 1:
-                                tempAnswersl = tempAnswersl + "B";
-                                break;
-                            case 2:
-                                tempAnswersl = tempAnswersl + "C";
-                                break;
-                            case 3:
-                                tempAnswersl = tempAnswersl + "D";
-                                break;
-                            case 4:
-                                tempAnswersl = tempAnswersl + "E";
-                                break;
-                            default:
-                                break;
-                        }
-
-                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
-                    }
-                    else if(selectIdx != -1 && i % 2 == 1)
-                    {
-                        selection[rCol] = selectIdx;
-                        rCol++;
-
-                        switch (selectIdx)
-                        {
-                            case 0:
-                                tempAnswersr = tempAnswersr + "A";
-                                break;
-                            case 1:
-                                tempAnswersr = tempAnswersr + "B";
-                                break;
-                            case 2:
-                                tempAnswersr = tempAnswersr + "C";
-                                break;
-                            case 3:
-                                tempAnswersr = tempAnswersr + "D";
-                                break;
-                            case 4:
-                                tempAnswersr = tempAnswersr + "E";
-                                break;
-                            default:
-                                break;
-                        }
-
-                        Imgproc.circle(incoming, points_grouped.get(i).get(selectIdx), 6, new Scalar(57, 255, 20), 2);
-                    }
-                }
-
-                tempAnswers =  tempAnswersl + tempAnswersr;
-            }
-
-            //sort array to string of numbers
-            // Pass to global frame img variable that's returned onCameraFrame.  Shows cropped scantron with circles.
-            mRgba = incoming;
-
-        }
-        if(finale)
-        {
-            Intent returnIntent = new Intent();
-            returnIntent.putExtra("tempAnswers", tempAnswers);
-            setResult(Activity.RESULT_OK,returnIntent);
-            finish();
-        }
-        else if (pressed == false && start)
-        {
-            // First press, stops onCameraFrame updating to show user the contour.  Another press and will start processing.
-            pressed = true;
-        }
     }
 }
