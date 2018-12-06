@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" charset="utf-8">
+
+    <title>OptiGrader - Register</title>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js" integrity="sha384-zJXJqc5ftX51ojskUi8aWFg0yrz9P61p6Wyg8n0cyFYsgWiAYtxnVWzh8d8BLcw0" crossorigin="anonymous"></script>
+
+    <!-- Password Popover -->
+    <script>
+        $(function () {
+            $('[data-toggle="popover"]').popover()
+        });
+
+        $('.popover-dismiss').popover({
+            trigger: 'focus'
+        });
+    </script>
+
+    <!-- Bootstrap CSS/JS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <!-- Custom stylesheet for index -->
+    <link href="css/custom.css" rel="stylesheet">
+
+    <script type="application/javascript">
+        var email_verified = false;
+        var nid_verified = false;
+        var BASE_URL = "https://" + window.location.hostname + ":8080/";
+
+        // Ensure the registration NID is not already in the database.
+        function validateNID()
+        {
+            var inputField = document.getElementById("inputNID");
+
+            if (inputField.checkValidity())
+            {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: BASE_URL + "register",
+                        data: JSON.stringify(
+                            {
+                                "nid": inputField.value
+                            }),
+                        dataType: "json",
+                        success: function (data, textStatus, jqXHR)
+                        {
+                            $("#connectionFailedAlert").hide();
+
+                            if (typeof data.success !== "undefined")
+                            {
+                                nid_verified = true;
+                                $("#nidExistsAlert").hide();
+                            }
+                            else
+                            {
+                                nid_verified = false;
+                                $("#nidExistsAlert").hide();
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown)
+                        {
+                            nid_verified = false;
+
+                            if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
+                            {
+                                console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
+                                $("#nidExistsAlert").show();
+                            }
+                            else
+                            {
+                                $("#nidExistsAlert").hide();
+                                $("#connectionFailedAlert").show();
+                            }
+                        }
+                    });
+            }
+        }
+
+        // Ensure the registration email is not already in the database.
+        function validateEmail()
+        {
+            var inputField = document.getElementById("inputEmail");
+
+            if (inputField.checkValidity())
+            {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: BASE_URL + "register",
+                        data: JSON.stringify(
+                            {
+                                "login": inputField.value
+                            }),
+                        dataType: "json",
+                        success: function (data, textStatus, jqXHR)
+                        {
+                            $("#connectionFailedAlert").hide();
+
+                            if (typeof data.success !== "undefined")
+                            {
+                                email_verified = true;
+                                $("#emailExistsAlert").hide();
+                            }
+                            else
+                            {
+                                email_verified = false;
+                                $("#emailExistsAlert").hide();
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown)
+                        {
+                            email_verified = false;
+
+                            if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
+                            {
+                                console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
+                                $("#emailExistsAlert").show();
+                            }
+                            else
+                            {
+                                $("#emailExistsAlert").hide();
+                                $("#connectionFailedAlert").show();
+                            }
+                        }
+                    });
+            }
+        }
+
+        // Ensure both emails are the same and valid.
+        function confirmEmail()
+        {
+            var inputField = document.getElementById("inputEmail");
+            var inputConfirmField = document.getElementById("inputConfirmEmail");
+
+            if (inputField.value === inputConfirmField.value)
+            {
+                if (inputConfirmField.value !== "" && inputField.checkValidity() && !inputConfirmField.checkValidity())
+                {
+                    inputConfirmField.setCustomValidity("");
+                }
+            }
+            else if (inputConfirmField.checkValidity())
+            {
+                inputConfirmField.setCustomValidity("Invalid");
+            }
+        }
+
+        // Ensure both passwords are the same and valid.
+        function confirmPassword()
+        {
+            var inputField = document.getElementById("inputPassword");
+            var inputConfirmField = document.getElementById("inputConfirmPassword");
+
+            if (inputField.value === inputConfirmField.value)
+            {
+                if (inputConfirmField.value !== "" && inputField.checkValidity() && !inputConfirmField.checkValidity())
+                {
+                    inputConfirmField.setCustomValidity("");
+                }
+            }
+            else if (inputConfirmField.checkValidity())
+            {
+                inputConfirmField.setCustomValidity("Invalid");
+            }
+        }
+
+        // Since help messages and field confirmation aren't built into HTML5,
+        // they have to be implemented.
+        $(document).ready(function ()
+        {
+            $(document).on("focusout", "#inputNID", validateNID);
+            $(document).on("focusout", "#inputEmail", validateEmail);
+            $(document).on("keyup", "#inputEmail", confirmEmail);
+            $(document).on("keyup", "#inputConfirmEmail", confirmEmail);
+
+            $(document).on("keyup", "#inputPassword", confirmPassword);
+            $(document).on("keyup", "#inputConfirmPassword", confirmPassword);
+
+            // Enables registration when all forms are valid.  On 'keyup' for responsiveness.
+            $(":input").bind("keyup change", function()
+            {
+                var inputFirstNameFieldValid = document.getElementById("inputFirstName").checkValidity();
+                var inputLastNameFieldValid = document.getElementById("inputLastName").checkValidity();
+                var inputNIDValid = document.getElementById("inputNID").checkValidity();
+                var inputEmailFieldValid = document.getElementById("inputEmail").checkValidity();
+                var inputEmailConfirmFieldValid = document.getElementById("inputConfirmEmail").checkValidity();
+                var inputPasswordFieldValid = document.getElementById("inputPassword").checkValidity();
+                var inputPasswordConfirmFieldValid = document.getElementById("inputConfirmPassword").checkValidity();
+                var inputUserModeValid = document.getElementById("user_mode").value !== "";
+
+                if (inputFirstNameFieldValid && inputLastNameFieldValid  && inputNIDValid && nid_verified && inputEmailFieldValid && email_verified && inputEmailConfirmFieldValid && inputPasswordFieldValid && inputPasswordConfirmFieldValid && inputUserModeValid)
+                {
+                    $('#register').prop('disabled', false);
+                }
+                else
+                {
+                    $('#register').prop('disabled', true);
+                }
+            });
+
+            $("#registration_form").submit(function (e)
+            {
+                e.preventDefault();
+
+                var inputFirstNameFieldValue = document.getElementById("inputFirstName").value;
+                var inputLastNameFieldValue = document.getElementById("inputLastName").value;
+                var inputNIDFieldValue = document.getElementById("inputNID").value;
+                var inputEmailFieldValue = document.getElementById("inputEmail").value;
+                var inputPasswordFieldValue = document.getElementById("inputPassword").value;
+                var inputUserModeFieldValue = document.getElementById("user_mode").value;
+
+                // Hash password with SHA-256
+                var hash = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(inputPasswordFieldValue));
+
+                // Send registration information to the server.
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: BASE_URL + "register",
+                        data: JSON.stringify(
+                            {
+                                "nid": inputNIDFieldValue,
+                                "user_mode": inputUserModeFieldValue,
+                                "firstname": inputFirstNameFieldValue,
+                                "lastname": inputLastNameFieldValue,
+                                "login": inputEmailFieldValue,
+                                "password": hash
+                            }),
+                        dataType: "json",
+                        success: function (data, textStatus, jqXHR)
+                        {
+                            $("#connectionFailedAlert").hide();
+
+                            if (typeof data.token !== "undefined")
+                            {
+                                document.cookie = "token=" + data.token;
+                                window.location.href = "dashboard.html";
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown)
+                        {
+                            if (typeof jqXHR.responseJSON !== "undefined" && typeof jqXHR.responseJSON.error !== "undefined")
+                            {
+                                console.log("SERVER ERROR: " + jqXHR.responseJSON.error);
+                                location.reload(true);
+                            }
+                            else
+                            {
+                                $("#connectionFailedAlert").show();
+                            }
+                        }
+                    });
+            });
+        });
+    </script>
+
+</head>
+<body>
+
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <h3 class="masthead-brand">OptiGrader</h3>
+            <nav class="nav nav-masthead justify-content-center">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="#">Features</a>
+                <a class="nav-link" href="login.html">Sign In</a>
+                <a class="nav-link active" href="register.html">Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Register Form -->
+    <div class="container-fluid">
+        <form id="registration_form">
+            <div class="row">
+                <div class="container card p-3 my-4 bg-light">
+                    <div style="text-align: center;"><h4>Create Your Account</h4></div>
+                    <hr>
+                    <form class="container was-validated" novalidate>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputFirstName">First Name</label>
+                                <input type="text" class="form-control" id="inputFirstName" placeholder="John" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputLastName">Last Name</label>
+                                <input type="text" class="form-control" id="inputLastName" placeholder="Smith" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputNID">NID</label>
+                            <input type="text" class="form-control" id="inputNID" placeholder="jo123456" required pattern="[a-z]{2}[0-9]{6}">
+                            <div class="invalid-feedback">Please provide a valid NID.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail">Email</label>
+                            <input type="text" class="form-control" id="inputEmail" placeholder="name@email.com" required pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
+                            <div class="invalid-feedback">Please provide a valid email.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputPassword">Password</label>
+                            <a href="#" tabindex="0" class="badge badge-dark" data-toggle="popover" data-trigger="focus" data-content="Your password must be at least 8 characters long, contain uppercase letters, lowercase letters, and numbers.">?</a>
+                            <input type="password" class="form-control" id="inputPassword" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputConfirmPassword">Confirm Password</label>
+                            <input type="password" class="form-control" id="inputConfirmPassword" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="user_mode" >Choose Account Type</label>
+                            <select class="custom-select" id="user_mode">
+                                <option value=""></option>
+                                <option value="0">Student</option>
+                                <option value="1">Teacher</option>
+                            </select>
+
+                        </div>
+
+                        <button type="submit" class="btn btn-info" id="register" disabled=true>Register</button>
+                        <hr>
+                        <div class="row mx-auto ">
+                            <p class="mb-0">Already have an account?
+                                <a class="text-black-50" href="login.html">  Sign In.</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+
+
+
+    <footer class="mastfoot mt-auto text-center">
+        <div class="inner">
+            <p><img src="images/GitHub-Mark-Light-32px.png"> Visit us on <a href="https://github.com/Bonfire/OptiGrader" target="_blank">GitHub</a>.</p>
+        </div>
+    </footer>
+</div>
+
+
+</body>
+</html>
