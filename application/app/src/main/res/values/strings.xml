@@ -37,7 +37,7 @@
     <string name="sign_up">Sign Up</string>
     <string name="logout">Logout</string>
     <string name="NID">NID</string>
-    <string name="gradeTest">Grade Test</string>
+    <string name="gradeTest">Scan Test</string>
     <string name="testID">Test ID</string>
 
 </resources>

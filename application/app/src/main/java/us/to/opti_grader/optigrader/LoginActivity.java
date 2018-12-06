@@ -15,10 +15,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.nio.charset.StandardCharsets;
-import java.math.BigInteger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,9 +22,12 @@ import org.json.JSONObject;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import us.to.optigrader.optigrader.R;
 
@@ -78,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Retrieve the data entered in the edit texts
 
-                login=emailEdit.getText().toString();
+                login=emailEdit.getText().toString().toLowerCase();
                 password=passwordEdit.getText().toString();
 
                 try {
@@ -136,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (response.has("token")) {
                                 //session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
-                                session.loginUser(login,"dummy","dummy", response.getString(KEY_TOKEN));
+                                session.loginUser(login,"fName","fName", response.getString(KEY_TOKEN));
                                 loadHomepage();
 
                             }else if(response instanceof JSONObject ){
@@ -158,8 +157,9 @@ public class LoginActivity extends AppCompatActivity {
                         //pDialog.dismiss();
 
                         //Display error message whenever an error occurs
-                        Toast.makeText(getApplicationContext(),
-                                error.getMessage(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(),
+                          //      error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"incorrect login",Toast.LENGTH_SHORT).show();
 
                     }
                 });

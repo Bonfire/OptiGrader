@@ -15,12 +15,14 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.common.hash.Hashing;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import us.to.optigrader.optigrader.R;
 
@@ -82,7 +84,7 @@ public class RegisterActivity extends AppCompatActivity {
         etConfirmEmail = findViewById(R.id.cregisterEM);
         eFName = findViewById(R.id.registerFN);
         eLName = findViewById(R.id.registerLN);
-        eNID = findViewById(R.id.registerNID);
+        //eNID = findViewById(R.id.registerNID);
 
         Button registerbtn = findViewById(R.id.registerBtn);
         ch1=(CheckBox)findViewById(R.id.instructorcheckBox);
@@ -92,12 +94,14 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Retrieve the data entered in the edit texts
                 login = emailEdit.getText().toString().toLowerCase().trim();
-                confirmEmail=etConfirmEmail.getText().toString().trim();
+                confirmEmail=etConfirmEmail.getText().toString().trim().toLowerCase();
                 password = passwordEdit.getText().toString().trim();
                 confirmPassword = etConfirmPassword.getText().toString().trim();
                 lName = eLName.getText().toString().trim();
                 fName = eFName.getText().toString().trim();
-                NID = eNID.getText().toString().trim();
+                //NID = eNID.getText().toString().trim();
+
+
 
 
                 if (validateInputs()) {
@@ -144,11 +148,6 @@ public class RegisterActivity extends AppCompatActivity {
             etConfirmEmail.requestFocus();
             return false;
         }
-        if (KEY_EMPTY.equals(NID)) {
-            eNID.setError("NID cannot be empty");
-            eNID.requestFocus();
-            return false;
-        }
         if (!password.equals(confirmPassword)) {
             etConfirmPassword.setError("Password and Confirm Password does not match");
             etConfirmPassword.requestFocus();
@@ -173,14 +172,26 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerUser() {
 
         JSONObject request = new JSONObject();
-        password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            String text = password;
+            // Change this to UTF-16 if needed
+            md.update(text.getBytes(StandardCharsets.UTF_8));
+            byte[] digest = md.digest();
+            String hex = String.format("%064x", new BigInteger(1, digest));
+            password = hex;
+        } catch (NoSuchAlgorithmException e)
+        {}
+
+        //password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
         try {
             //Populate the request parameters
             request.put(KEY_USERNAME, login);
             request.put(KEY_PASSWORD, password);
             request.put(KEY_F_NAME, fName);
             request.put(KEY_L_NAME, lName);
-            request.put(KEY_NID, NID);
+            //request.put(KEY_NID, NID);
 
             if(ch1.isChecked()){
                 request.put(KEY_PROF, "1");
