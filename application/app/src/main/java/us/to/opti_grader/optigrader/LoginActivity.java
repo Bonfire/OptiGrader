@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 login=emailEdit.getText().toString();
                 password=passwordEdit.getText().toString();
-                
+
                 try {
                     MessageDigest md = MessageDigest.getInstance("SHA-256");
                     String text = password;
@@ -88,8 +88,6 @@ public class LoginActivity extends AppCompatActivity {
                     byte[] digest = md.digest();
                     String hex = String.format("%064x", new BigInteger(1, digest));
                     password = hex;
-
-                    Log.i("opencvstuff", "FJDFDFF D: " + password);
                 } catch (NoSuchAlgorithmException e)
                 {}
 
@@ -137,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (response.has("token")) {
                                 //session.loginUser(login,response.getString(KEY_F_NAME),response.getString(KEY_L_NAME));
-                                session.loginUser(login,"dummy","dummy",response.getString(KEY_TOKEN) );
+                                session.loginUser(login,"dummy","dummy", response.getString(KEY_TOKEN));
                                 loadHomepage();
 
                             }else if(response instanceof JSONObject ){
