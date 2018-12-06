@@ -109,6 +109,7 @@
         function clearPage(){
             currentExam = "undefined";
             console.log("clearPage called");
+            console.log(`isTeacher: ${isTeacher}`);
             $('#pageContent').hide();
             if(isTeacher)
             {
@@ -281,7 +282,7 @@
                         document.getElementById('newExamKey').value ="";
                         document.getElementById('newExamName').value ="";
                         $('#addTestAlert').collapse('hide');
-                        
+                        console.log(`sidebarvisible ${$('#sidebar').is(":visible"))}`)
                         reloadJSON(($('#sideBar').is(":visible")) ? 2 : 0);             
                     }
                   },
@@ -396,6 +397,8 @@
                 {
                     isTeacher = ($.isArray(data))? 1:0;
                     userJSON = data;
+                    console.log(`isTeacher: ${isTeacher}`);
+                    cosnole.log(userJSON);
                     clearPage();
                 },
                 error: function (jqXHR, textStatus, errorThrown)
