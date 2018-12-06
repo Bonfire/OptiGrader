@@ -317,8 +317,8 @@
                 console.log("empty grid");
                 var empty = document.createElement('div');
                 empty.classList.add("text-center", "text-muted", "pt-5", "py-5");
-                empty.innerHTML = `<h5>No exams have been created. 
-                                    <a class="text-dark" href="" data-toggle="modal" data-target="#addTestModal">Create one now!</a></h5>`;
+                empty.innerHTML = `<h5>No exams have been created. Create one now!</h5>`
+                //empty.innerHTML = `<h5>No exams have been created. <a class="text-dark" href="" data-toggle="modal" data-target="#addTestModal">Create one now!</a></h5>`;
                 nav.appendChild(empty);
             }
             currentPage = 0;
@@ -371,7 +371,7 @@
                     if(typeof data.status !== "undefined")
                     {
                         console.log("add Exam defined");
-                        document.getElementById('responseModalBody').innerHTML = data.code;
+                        document.getElementById('responseModalBody').innerHTML = "Test Succesfully added. " + data.code;
                         $('#addTestModal').modal('hide');
                         $('#responseModal').modal('show');
                         document.getElementById('newExamKey').value ="";
@@ -391,6 +391,35 @@
             {
                 $('#addTestAlert').collapse('show');
             }
+        }
+
+        function deleteExam(){
+            console.log("deleteExam called");
+            $.ajax(
+                {
+                  type: "POST",
+                  url: BASE_URL + "test",
+                  data: JSON.stringify(
+                  {
+                    "token": token,
+                    "action": "delete",
+                    "testCode": outer.id
+                  }),
+                  dataType: "json",
+                  success: function (data, textStatus, jqXHR)
+                  {
+                    console.log("exam deleted")
+                    reloadJSON(0);
+                    document.getElementById('responseModalBody').innerHTML = "Test Succesfully deleted.";
+                    $('#deleteTestModal').modal('hide');
+                    $('#responseModal').modal('show');
+                  },
+                  error: function (jqXHR, textStatus, errorThrown)
+                  {
+                    console.log("connection error");
+                  }
+                });
+
         }
 
         function reloadJSON(pageToLoad){
@@ -414,10 +443,6 @@
                 if(pageToLoad === 5)
                 {
                     pageToLoad = currentPage;
-                }
-                else if(pageToLoad === 6)
-                {
-                    pageToLoad = 0;
                 }
 
                 if(userMode)
@@ -484,7 +509,7 @@
         <!-- Top Navbar -->
         <header class="masthead mb-auto">
             <div class="inner">
-                <a href="#" onclick="reloadJSON(6)"><h3 class="masthead-brand">OptiGrader</h3><a>
+                <a href="#" onclick="reloadJSON(0)"><h3 class="masthead-brand">OptiGrader</h3><a>
                 <nav class="nav nav-masthead justify-content-center">
                     <a class="nav-link active" href="#">Home</a>
                     <a class="nav-link " href="index.html">Sign Out</a>
@@ -591,7 +616,7 @@
                         Are you sure you want to delete this exam?
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
-                        <button type="button" class="btn btn-info">Yes</button>
+                        <button type="button" onclick="deleteExam()" class="btn btn-info">Yes</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
                     </div>
                 </div>
