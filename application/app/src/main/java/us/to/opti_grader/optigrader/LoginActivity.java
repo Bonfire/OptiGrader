@@ -15,7 +15,10 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.common.hash.Hashing;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
+import java.math.BigInteger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,8 +80,19 @@ public class LoginActivity extends AppCompatActivity {
 
                 login=emailEdit.getText().toString();
                 password=passwordEdit.getText().toString();
+                
+                try {
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
+                    String text = password;
+                    // Change this to UTF-16 if needed
+                    md.update(text.getBytes(StandardCharsets.UTF_8));
+                    byte[] digest = md.digest();
+                    String hex = String.format("%064x", new BigInteger(1, digest));
+                    password = hex;
 
-                password= Hashing.sha256().hashString(password, StandardCharsets.UTF_8).toString();
+                    Log.i("opencvstuff", "FJDFDFF D: " + password);
+                } catch (NoSuchAlgorithmException e)
+                {}
 
                 if (validateInputs()) {
                     login();
