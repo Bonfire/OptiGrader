@@ -392,7 +392,7 @@
                         document.getElementById('newExamName').value ="";
                         $('#addTestAlert').collapse('hide');
                         
-                        reloadPage();                   
+                        reloadJSON();                   
                     }
                   },
                   error: function (jqXHR, textStatus, errorThrown)
@@ -408,7 +408,7 @@
         }
 
         function reloadJSON(){
-            console.log("loadJSON called");
+            console.log("reloadJSON called");
             $.ajax(
             {
               type: "POST",
