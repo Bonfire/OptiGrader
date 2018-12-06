@@ -38,7 +38,7 @@ import us.to.optigrader.optigrader.R;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String KEY_STATUS = "status";
-    private static final String KEY_MESSAGE = "message";
+    private static final String KEY_MESSAGE = "status";
     private static final String KEY_FULL_NAME = "full_name";
     private static final String KEY_F_NAME = "firstName";
     private static final String KEY_L_NAME = "lastName";
@@ -139,10 +139,13 @@ public class LoginActivity extends AppCompatActivity {
                                 session.loginUser(login,"dummy","dummy", response.getString(KEY_TOKEN));
                                 loadHomepage();
 
-                            }else{
+                            }else if(response instanceof JSONObject ){
                                 Toast.makeText(getApplicationContext(),
-                                        response.getString(KEY_MESSAGE), Toast.LENGTH_SHORT).show();
+                                        response.getString(KEY_STATUS), Toast.LENGTH_SHORT).show();
 
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),"incorrect login",Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
