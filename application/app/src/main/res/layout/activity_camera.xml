@@ -1,52 +1,59 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0099cc"
-    tools:context=".CameraActivity">
+    xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-    <!-- The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc. -->
-    <TextView
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
-        android:textStyle="bold" />
+    <org.opencv.android.JavaCameraView
+        android:id="@+id/camera_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
 
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+    <LinearLayout
+        android:id="@+id/button_row_linear_layout"
 
-        <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/button_start"
+
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
+            android:layout_weight="1"
+            android:onClick="captureButtonPressed"
 
-            <Button
-                android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/capture"
-                android:textColor="@android:color/background_light" />
+            android:rotation="270"
+            android:text="Start" />
 
-        </LinearLayout>
-    </FrameLayout>
+        <Button
+            android:id="@+id/button_confirm"
 
-</FrameLayout>
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            android:rotation="270"
+            android:text="Confirm" />
+
+
+
+        <Button
+            android:id="@+id/button_retry"
+
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="captureButtonPressed"
+
+            android:rotation="270"
+            android:text="Retry" />
+
+
+
+    </LinearLayout>
+</RelativeLayout>
